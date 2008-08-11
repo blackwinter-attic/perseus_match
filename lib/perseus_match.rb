@@ -57,7 +57,8 @@ class PerseusMatch
 
   # 1 >= similarity >= 0
   def similarity(coeff = nil)
-    @similarity[coeff ||= default_coeff] ||= 1 / Math.exp(distance / (coeff * total_weight))
+    coeff ||= default_coeff  # passed arg may be nil
+    @similarity[coeff] ||= 1 / Math.exp(distance / (coeff * total_weight))
   end
 
   private

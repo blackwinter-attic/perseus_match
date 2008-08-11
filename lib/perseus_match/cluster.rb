@@ -54,7 +54,8 @@ class PerseusMatch
     end
 
     def rank(options = {})
-      sort(options) { |match| [match.target, match.similarity(options[:coeff])] }
+      coeff = options[:coeff]
+      sort(options) { |match| [match.target, match.similarity(coeff)] }
     end
 
   end
