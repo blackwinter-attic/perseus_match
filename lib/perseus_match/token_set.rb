@@ -32,7 +32,7 @@ class PerseusMatch
         @tokens[form]
       else
         cfg  = File.join(Dir.pwd, 'perseus.cfg')
-        file = File.join(Dir.pwd, form)
+        file = form[0] == ?/ ? form : File.join(Dir.pwd, form)
 
         unless File.file?(file) && File.readable?(file)
           require 'tempfile'
@@ -48,11 +48,15 @@ class PerseusMatch
           ./lingo.rb -c #{cfg} < #{file}
         }] }
 
-        temp.unlink if temp
+        if temp
+          temp.unlink
 
-        tokens  = @tokens[form]
-        @tokens = nil
-        tokens
+          tokens  = @tokens[form]
+          @tokens = nil
+          tokens
+        else
+          @tokens[form]
+        end
       end
     end
 

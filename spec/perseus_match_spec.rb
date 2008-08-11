@@ -1,3 +1,5 @@
+require 'tempfile'
+
 require 'rubygems'
 require 'nuggets/util/i18n'
 
@@ -24,11 +26,21 @@ describe PerseusMatch do
 
     @somewhat_similar = @highly_similar + @similar + @unfortunately_similar
 
-    @matchings = PerseusMatch.match(@somewhat_similar + [
+    phrases = @somewhat_similar + [
       'Drei mal drei macht sechs',
       'Das Ende dieses Blödsinns',
       ''
-    ])
+    ]
+
+    temp = Tempfile.new('perseus_match_spec_temp')
+    temp.puts phrases.join("\n")
+    temp.close
+
+    PerseusMatch::TokenSet.tokenize(temp.path)
+
+    temp.unlink
+
+    @matchings = PerseusMatch.match(phrases)
   end
 
   it 'should identify identical (non-empty) strings as identical' do
