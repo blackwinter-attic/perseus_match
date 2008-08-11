@@ -21,8 +21,8 @@ class PerseusMatch
             when /<(.*?)\s=\s\[(.*)\]>/
               a, b = $1, $2
               @_tokens[a.sub(/\|.*/, '')] ||= b.scan(/\((.*?)\+?\)/).flatten
-            when /<(.*)>/, /:(.*):/
-              # ignore
+            #when /<(.*)>/, /:(.*):/
+            #  # ignore
           end
         }
       }
