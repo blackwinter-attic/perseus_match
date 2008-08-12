@@ -2,6 +2,42 @@ $KCODE = 'u'
 
 LINGO_BASE = '/home/jw/devel/lingo/trunk'
 
+LINGO_CONFIG = {
+  'meeting' => {
+    'attendees' => [
+      { 'textreader'   => { 'files'=> 'STDIN' } },
+      { 'tokenizer'    => {  } },
+      { 'wordsearcher' => { 'source' => 'sys-dic', 'mode' => 'first' } },
+      { 'decomposer'   => { 'source' => 'sys-dic' } },
+      { 'multiworder'  => { 'source' => 'sys-mul', 'stopper' => 'PUNC,OTHR' } },
+      { 'synonymer'    => { 'source' => 'sys-syn', 'out' => 'syn', 'skip'=>'?,t' } },
+      { 'debugger'     => { 'prompt' => '', 'eval' => 'true', 'ceval' => 'false' } }
+    ]
+  }
+}
+
+require 'tempfile'
+require 'yaml'
+
+# use enhanced Tempfile#make_tmpname, as of r13631
+if RUBY_RELEASE_DATE < '2007-10-05'
+  class Tempfile
+
+    def make_tmpname(basename, n)
+      case basename
+      when Array
+        prefix, suffix = *basename
+      else
+        prefix, suffix = basename, ''
+      end
+
+      t = Time.now.strftime("%Y%m%d")
+      path = "#{prefix}#{t}-#{$$}-#{rand(0x100000000).to_s(36)}-#{n}#{suffix}"
+    end
+
+  end
+end
+ 
 class PerseusMatch
 
   class TokenSet < Array
@@ -31,12 +67,13 @@ class PerseusMatch
         File.open(t) { |f| parse[f] }
         @tokens[form]
       else
-        cfg  = File.join(Dir.pwd, 'perseus.cfg')
+        cfg = Tempfile.new(['perseus_match_lingo', '.cfg'])
+        YAML.dump(LINGO_CONFIG, cfg)
+        cfg.close
+
         file = form[0] == ?/ ? form : File.join(Dir.pwd, form)
 
         unless File.file?(file) && File.readable?(file)
-          require 'tempfile'
-
           temp = Tempfile.new('perseus_match_temp')
           temp.puts form
           temp.close
@@ -45,8 +82,10 @@ class PerseusMatch
         end
 
         Dir.chdir(LINGO_BASE) { parse[%x{
-          ./lingo.rb -c #{cfg} < #{file}
+          ./lingo.rb -c #{cfg.path} < #{file}
         }] }
+
+        cfg.unlink
 
         if temp
           temp.unlink
