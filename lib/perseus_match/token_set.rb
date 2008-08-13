@@ -90,8 +90,7 @@ class PerseusMatch
         if temp
           temp.unlink
 
-          tokens  = @tokens[form]
-          @tokens = nil
+          tokens, @tokens = @tokens[form], nil
           tokens
         else
           @tokens[form]

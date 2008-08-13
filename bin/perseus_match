@@ -9,11 +9,24 @@ require 'perseus_match'
 USAGE = "Usage: #{$0} [-h|--help] [options] <file>"
 abort USAGE if ARGV.empty?
 
+options = {
+  :sort      => false,
+  :threshold => 0
+}
+
 OptionParser.new { |opts|
   opts.banner = USAGE
 
   opts.separator ''
   opts.separator 'Options:'
+
+  opts.on('-t', '--threshold NUM', Float, "Similarity threshold [Default: #{options[:threshold]}]") { |t|
+    options[:threshold] = t
+  }
+
+  opts.on('-s', '--sort', 'Sort results (considerably slower!)') {
+    options[:sort] = true
+  }
 
   opts.separator ''
   opts.separator 'Generic options:'
@@ -31,4 +44,21 @@ unless file = ARGV.shift
   abort "No input file specified.\n#{USAGE}"
 else
   abort "Input file not found: #{file}" unless File.readable?(file)
+end
+
+PerseusMatch::TokenSet.tokenize(file)
+
+phrases = File.readlines(file).map { |line| line.chomp }
+threshold = options[:threshold]
+
+if options[:sort]
+  require 'pp'
+
+  pp PerseusMatch::Cluster.new(phrases).sort { |m|
+    [m.target, m.distance, m.similarity] if m.similarity >= threshold
+  }.compact
+else
+  PerseusMatch::List.pair(phrases) { |pm|
+    p [pm.phrase, pm.target, pm.distance, pm.similarity] if pm.similarity >= threshold
+  }
 end
