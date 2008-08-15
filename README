@@ -15,6 +15,12 @@ Fuzzy string matching based on linguistic analysis.
 * Jens Wille <mailto:jens.wille@uni-koeln.de>
 
 
+== LINKS
+
+* <http://prometheus.rubyforge.org/perseus_match>
+* <http://github.com/blackwinter/perseus_match>
+
+
 == LICENSE AND COPYRIGHT
 
 Copyright (C) 2008 Cologne University of Applied Sciences,
