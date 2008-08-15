@@ -14,7 +14,7 @@ begin
       :summary      => %q{Fuzzy string matching based on linguistic analysis},
       :files        => FileList['lib/**/*.rb', 'bin/*'].to_a,
       :extra_files  => FileList['[A-Z]*'].to_a,
-      :dependencies => %w[]
+      :dependencies => [['ruby-nuggets', '>= 0.3.0']]
     }
   }}
 rescue LoadError

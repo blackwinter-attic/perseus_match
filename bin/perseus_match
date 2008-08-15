@@ -1,6 +1,10 @@
 #! /usr/bin/ruby
 
 require 'optparse'
+require 'benchmark'
+
+require 'rubygems'
+require 'nuggets/numeric/duration'
 
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
 
@@ -10,8 +14,9 @@ USAGE = "Usage: #{$0} [-h|--help] [options] <file>"
 abort USAGE if ARGV.empty?
 
 options = {
-  :sort      => false,
-  :threshold => 0
+  :stats     => false,
+  :threshold => 0,
+  :sort      => false
 }
 
 OptionParser.new { |opts|
@@ -19,6 +24,10 @@ OptionParser.new { |opts|
 
   opts.separator ''
   opts.separator 'Options:'
+
+  opts.on('--stats', 'Output some statistics at the end') {
+    options[:stats] = true
+  }
 
   opts.on('-t', '--threshold NUM', Float, "Similarity threshold [Default: #{options[:threshold]}]") { |t|
     options[:threshold] = t
@@ -49,16 +58,37 @@ end
 PerseusMatch::TokenSet.tokenize(file)
 
 phrases = File.readlines(file).map { |line| line.chomp }
-threshold = options[:threshold]
 
-if options[:sort]
-  require 'pp'
+threshold, count, count_all = options[:threshold], 0, 0
 
-  pp PerseusMatch::Cluster.new(phrases).sort { |m|
-    [m.target, m.distance, m.similarity] if m.similarity >= threshold
-  }.compact
-else
-  PerseusMatch::List.pair(phrases) { |pm|
-    p [pm.phrase, pm.target, pm.distance, pm.similarity] if pm.similarity >= threshold
-  }
+time = Benchmark.realtime {
+  if options[:sort]
+    require 'pp'
+
+    pp PerseusMatch::Cluster.new(phrases).sort { |pm|
+      if pm.similarity >= threshold
+        [pm.target, pm.distance, pm.similarity]
+        count += 1
+      end
+      count_all += 1
+    }.compact
+  else
+    PerseusMatch::List.pair(phrases) { |pm|
+      if pm.similarity >= threshold
+        p [pm.phrase, pm.target, pm.distance, pm.similarity]
+        count += 1
+      end
+      count_all += 1
+    }
+  end
+}
+
+if options[:stats]
+  hms, x, y = time.to_hms(2), time / count, time / count_all
+
+  precision = lambda { |i| i.to_s.sub(/\./, '')[/\A0*/].length + 2 }
+
+  warn "%d (%d/%d): %s => %0.#{precision[x]}fs/%0.#{precision[y]}fs" % [
+    phrases.size, count, count_all, hms, x, y
+  ]
 end
