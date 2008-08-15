@@ -22,7 +22,7 @@ describe PerseusMatch do
       'Die Die Die Anbetung der Könige',
       'Die Könige der Anbetung',
       'Königsanbetung hoch drei'
-    ]  # *not* ok -- eventually try to drop these
+    ]  # *not* ok -- eventually try to drop these below the threshold
 
     @somewhat_similar = @highly_similar + @similar + @unfortunately_similar
 
@@ -33,7 +33,7 @@ describe PerseusMatch do
     ]
 
     temp = Tempfile.new('perseus_match_spec_temp')
-    temp.puts phrases.join("\n")
+    temp.puts *phrases
     temp.close
 
     PerseusMatch::TokenSet.tokenize(temp.path)
@@ -117,6 +117,10 @@ describe PerseusMatch do
         similarities[[matching.phrase, matching.target]] = matching.similarity
       end
     }
+  end
+
+  it 'should be clusterable' do
+    PerseusMatch.cluster(@somewhat_similar)
   end
 
 end
