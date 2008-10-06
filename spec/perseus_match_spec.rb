@@ -123,4 +123,4 @@ describe PerseusMatch do
     PerseusMatch.cluster(@somewhat_similar)
   end
 
-end
+end if LINGO_FOUND

@@ -30,6 +30,8 @@ $KCODE = 'u'
 
 LINGO_BASE = '/home/jw/devel/lingo/trunk'
 
+LINGO_FOUND = File.executable?(File.join(LINGO_BASE, 'lingo.rb'))
+
 LINGO_CONFIG = {
   'meeting' => {
     'attendees' => [
@@ -38,7 +40,7 @@ LINGO_CONFIG = {
       { 'wordsearcher' => { 'source' => 'sys-dic', 'mode' => 'first' } },
       { 'decomposer'   => { 'source' => 'sys-dic' } },
       { 'multiworder'  => { 'source' => 'sys-mul', 'stopper' => 'PUNC,OTHR' } },
-      { 'synonymer'    => { 'source' => 'sys-syn', 'out' => 'syn', 'skip'=>'?,t' } },
+      { 'synonymer'    => { 'source' => 'sys-syn', 'skip' => '?,t' } },
       { 'debugger'     => { 'prompt' => '', 'eval' => 'true', 'ceval' => 'false' } }
     ]
   }
@@ -95,6 +97,8 @@ class PerseusMatch
         File.open(t) { |f| parse[f] }
         @tokens[form]
       else
+        raise "lingo installation not found at #{LINGO_BASE}" unless LINGO_FOUND
+
         cfg = Tempfile.new(['perseus_match_lingo', '.cfg'])
         YAML.dump(LINGO_CONFIG, cfg)
         cfg.close

@@ -6,7 +6,7 @@ describe PerseusMatch::TokenSet do
 
   it 'should tokenize a string' do
     PerseusMatch::TokenSet.tokenize('foo bar').should be_an_instance_of(PerseusMatch::TokenSet)
-  end
+  end if LINGO_FOUND
 
   it 'should take a prepared file for tokenization' do
     # prevent lingo from being used

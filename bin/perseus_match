@@ -61,29 +61,29 @@ phrases = File.readlines(file).map { |line| line.chomp }
 
 threshold, count, count_all = options[:threshold], 0, 0
 
-time = Benchmark.realtime {
-  if options[:sort]
-    require 'pp'
+action = options[:sort] ? lambda {
+  require 'pp'
 
-    pp PerseusMatch::Cluster.new(phrases).sort { |pm|
-      if pm.similarity >= threshold
-        [pm.target, pm.distance, pm.similarity]
-        count += 1
-      end
-      count_all += 1
-    }.compact
-  else
-    PerseusMatch::List.pair(phrases) { |pm|
-      if pm.similarity >= threshold
-        p [pm.phrase, pm.target, pm.distance, pm.similarity]
-        count += 1
-      end
-      count_all += 1
-    }
-  end
+  pp PerseusMatch::Cluster.new(phrases).sort { |pm|
+    if pm.similarity >= threshold
+      [pm.target, pm.distance, pm.similarity]
+      count += 1
+    end
+    count_all += 1
+  }.compact
+} : lambda {
+  PerseusMatch::List.pair(phrases) { |pm|
+    if pm.similarity >= threshold
+      p [pm.phrase, pm.target, pm.distance, pm.similarity]
+      count += 1
+    end
+    count_all += 1
+  }
 }
 
 if options[:stats]
+  time = Benchmark.realtime(&action)
+
   hms, x, y = time.to_hms(2), time / count, time / count_all
 
   precision = lambda { |i| i.to_s.sub(/\./, '')[/\A0*/].length + 2 }
@@ -91,4 +91,6 @@ if options[:stats]
   warn "%d (%d/%d): %s => %0.#{precision[x]}fs/%0.#{precision[y]}fs" % [
     phrases.size, count, count_all, hms, x, y
   ]
+else
+  action.call
 end

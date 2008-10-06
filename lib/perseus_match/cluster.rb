@@ -63,11 +63,11 @@ class PerseusMatch
             lambda { |match| res[match] < threshold } :
             lambda { |match| res[match] > threshold }
 
-          matches.reject! { |match| condition[match] }
+          matches.reject!(&condition)
         end
 
         if limit = options[:limit]
-          matches.slice!(limit..-1)
+          matches.slice!(limit..-1) if matches.size > limit
         end
 
         # transform entries if so requested

@@ -10,15 +10,15 @@ This documentation refers to perseus_match version 0.0.2
 Fuzzy string matching based on linguistic analysis.
 
 
-== AUTHORS
-
-* Jens Wille <mailto:jens.wille@uni-koeln.de>
-
-
 == LINKS
 
 * <http://prometheus.rubyforge.org/perseus_match>
 * <http://github.com/blackwinter/perseus_match>
+
+
+== AUTHORS
+
+* Jens Wille <mailto:jens.wille@uni-koeln.de>
 
 
 == LICENSE AND COPYRIGHT
