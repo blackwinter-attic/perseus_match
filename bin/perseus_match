@@ -18,7 +18,8 @@ options = {
   :config    => nil,
   :threshold => 0,
   :sort      => false,
-  :stats     => false
+  :stats     => false,
+  :check     => false
 }
 
 OptionParser.new { |opts|
@@ -27,7 +28,7 @@ OptionParser.new { |opts|
   opts.separator ''
   opts.separator 'Options:'
 
-  opts.on('-c', '--config YAML', "Config file in YAML format") { |f|
+  opts.on('-c', '--config YAML', 'Config file in YAML format') { |f|
     abort "Can't find config file: #{f}." unless File.readable?(f)
 
     options[:config] = f
@@ -45,6 +46,12 @@ OptionParser.new { |opts|
 
   opts.on('--stats', 'Output some statistics at the end') {
     options[:stats] = true
+  }
+
+  opts.separator ''
+
+  opts.on('--check', 'Check pairs in input file (CSV) against', 'specified (or global) threshold') {
+    options[:check] = true
   }
 
   opts.separator ''
@@ -67,32 +74,62 @@ end
 
 PerseusMatch::TokenSet.tokenize(file)
 
-phrases = File.readlines(file).map { |line| line.chomp }
+skip_re = %r{\A\s*(?:#|\z)}o
+phrases = File.readlines(file).map { |line| line.chomp unless line =~ skip_re }.compact
 
 pm_options = {}
 pm_options[:distance_spec] = YAML.load_file(options[:config]) if options[:config]
 
 threshold, count, count_all = options[:threshold], 0, 0
 
-action = options[:sort] ? lambda {
-  require 'pp'
+action = if options[:check]
+  require 'fastercsv'
 
-  pp PerseusMatch::Cluster.new(phrases, pm_options).sort { |pm|
-    if pm.similarity >= threshold
-      [pm.target, pm.distance, pm.similarity]
-      count += 1
-    end
-    count_all += 1
-  }.compact
-} : lambda {
-  PerseusMatch::List.pair(phrases, pm_options) { |pm|
-    if pm.similarity >= threshold
-      p [pm.phrase, pm.target, pm.distance, pm.similarity]
-      count += 1
-    end
-    count_all += 1
+  phrases.sort! if options[:sort]
+  phrases.map! { |line| [line, FasterCSV.parse_line(line)] }
+
+  lambda {
+    phrases.each { |line, spec|
+      phrase, target, threshold, operator, _ = *spec
+
+      threshold ||= options[:threshold]
+      operator  ||= :>
+
+      res = begin
+        PerseusMatch.check!(phrase, target, threshold.to_f, operator, pm_options)
+        'OK'
+      rescue PerseusMatch::CheckFailedError => err
+        "FAILED -- #{err.value}"
+      end
+
+      puts "#{line} [#{res}]"
+    }
   }
-}
+else
+  if options[:sort]
+    lambda {
+      require 'pp'
+
+      pp PerseusMatch::Cluster.new(phrases, pm_options).sort { |pm|
+        if pm.similarity >= threshold
+          [pm.target, pm.distance, pm.similarity]
+          count += 1
+        end
+        count_all += 1
+      }.compact
+    }
+  else
+    lambda {
+      PerseusMatch::List.pair(phrases, pm_options) { |pm|
+        if pm.similarity >= threshold
+          p [pm.phrase, pm.target, pm.distance, pm.similarity]
+          count += 1
+        end
+        count_all += 1
+      }
+    }
+  end
+end
 
 if options[:stats]
   time = Benchmark.realtime(&action)

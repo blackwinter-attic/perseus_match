@@ -83,7 +83,7 @@ describe PerseusMatch do
     }
   end
 
-  it 'should identify certain strings as highly similar' do
+  it 'should identify certain strings as highly similar (1)' do
     @matchings.each { |matching|
       if @highly_similar.include?(matching.phrase) && @highly_similar.include?(matching.target)
         inform_on_error(matching) { matching.similarity.should > 0.9 }
@@ -91,7 +91,15 @@ describe PerseusMatch do
     }
   end
 
-  it 'should identify certain strings as similar' do
+  it 'should identify certain strings as highly similar (2)' do
+    @highly_similar.each { |phrase|
+      @highly_similar.each { |target|
+        inform_on_error([phrase, target]) { PerseusMatch.check(phrase, target, 0.9).should be_true }
+      }
+    }
+  end
+
+  it 'should identify certain strings as similar (1)' do
     @matchings.each { |matching|
       if @similar.include?(matching.phrase) && @similar.include?(matching.target)
         inform_on_error(matching) { matching.similarity.should > 0.8 }
@@ -99,10 +107,26 @@ describe PerseusMatch do
     }
   end
 
-  it 'should *not* identify other strings as similar' do
+  it 'should identify certain strings as similar (2)' do
+    @similar.each { |phrase|
+      @similar.each { |target|
+        inform_on_error([phrase, target]) { PerseusMatch.check(phrase, target, 0.8).should be_true }
+      }
+    }
+  end
+
+  it 'should *not* identify other strings as similar (1)' do
     @matchings.each { |matching|
       if @somewhat_similar.include?(matching.phrase) && !@somewhat_similar.include?(matching.target)
         inform_on_error(matching) { matching.similarity.should_not > 0.8 }
+      end
+    }
+  end
+
+  it 'should *not* identify other strings as similar (2)' do
+    @matchings.each { |matching|
+      if @somewhat_similar.include?(matching.phrase) && !@somewhat_similar.include?(matching.target)
+        inform_on_error(matching) { PerseusMatch.check(matching.phrase, matching.target, 0.8).should be_false }
       end
     }
   end
@@ -120,7 +144,22 @@ describe PerseusMatch do
   end
 
   it 'should be clusterable' do
-    PerseusMatch.cluster(@somewhat_similar)
+    PerseusMatch.cluster(@somewhat_similar).should be_an_instance_of(Array)
+  end
+
+  it 'should be checkable (1)' do
+    PerseusMatch.check('foo', 'bar', 0, :>=).should be_true
+  end
+
+  it 'should be checkable (2)' do
+    lambda {
+      begin
+        PerseusMatch.check!('foo', 'bar', 0, :>)
+      rescue PerseusMatch::CheckFailedError => err
+        err.to_s.should =~ /0/
+        raise err
+      end
+    }.should raise_error(PerseusMatch::CheckFailedError)
   end
 
 end if LINGO_FOUND

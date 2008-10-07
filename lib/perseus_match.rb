@@ -48,12 +48,23 @@ class PerseusMatch
 
   class << self
 
-    def match(phrases)
-      List.new(phrases)
+    def match(phrases, pm_options = {})
+      List.new(phrases, pm_options)
     end
 
-    def cluster(phrases, options = {})
-      Cluster.new(phrases).rank(options)
+    def cluster(phrases, options = {}, pm_options = {})
+      Cluster.new(phrases, pm_options).rank(options)
+    end
+
+    def check(*args)
+      check!(*args)
+    rescue CheckFailedError
+      false
+    end
+
+    def check!(phrase, target, threshold = 0, operator = :>, pm_options = {}, attribute = :similarity)
+      value = new(phrase, target, pm_options).send(attribute)
+      value.send(operator, threshold) or raise CheckFailedError.new(value, threshold, operator)
     end
 
   end
@@ -61,8 +72,8 @@ class PerseusMatch
   attr_reader :phrase, :target, :distance_spec, :default_coeff
 
   def initialize(phrase, target, options = {})
-    @phrase = phrase
-    @target = target
+    @phrase = phrase.to_s
+    @target = target.to_s
 
     @default_coeff = options[:default_coeff] || DEFAULT_COEFF
     @distance_spec = options[:distance_spec] || DISTANCE_SPEC
@@ -118,6 +129,20 @@ class PerseusMatch
 
   def total_weight
     @total_weight ||= distance_spec.inject(0.0) { |total, (_, weight)| total + weight }
+  end
+
+  class CheckFailedError < StandardError
+
+    attr_reader :value, :threshold, :operator
+
+    def initialize(value, threshold, operator)
+      @value, @threshold, @operator = value, threshold, operator
+    end
+
+    def to_s
+      "FAILED: #{value} #{operator} #{threshold}"
+    end
+
   end
 
 end
