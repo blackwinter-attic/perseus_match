@@ -98,9 +98,11 @@ action = if options[:check]
       res = begin
         PerseusMatch.check!(phrase, target, threshold.to_f, operator, pm_options)
         'OK'
+        count += 1
       rescue PerseusMatch::CheckFailedError => err
         "FAILED -- #{err.value}"
       end
+      count_all += 1
 
       puts "#{line} [#{res}]"
     }
