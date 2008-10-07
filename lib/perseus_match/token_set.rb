@@ -30,7 +30,7 @@ $KCODE = 'u'
 
 LINGO_BASE = '/home/jw/devel/lingo/trunk'
 
-LINGO_FOUND = File.executable?(File.join(LINGO_BASE, 'lingo.rb'))
+LINGO_FOUND = File.readable?(File.join(LINGO_BASE, 'lingo.rb'))
 
 LINGO_CONFIG = {
   'meeting' => {
@@ -46,6 +46,7 @@ LINGO_CONFIG = {
   }
 }
 
+require 'pathname'
 require 'tempfile'
 require 'yaml'
 
@@ -103,7 +104,7 @@ class PerseusMatch
         YAML.dump(LINGO_CONFIG, cfg)
         cfg.close
 
-        file = form[0] == ?/ ? form : File.join(Dir.pwd, form)
+        file = Pathname.new(form).absolute? ? form : File.join(Dir.pwd, form)
 
         unless File.file?(file) && File.readable?(file)
           temp = Tempfile.new('perseus_match_temp')
@@ -113,15 +114,16 @@ class PerseusMatch
           file = temp.path
         end
 
-        Dir.chdir(LINGO_BASE) { parse[%x{
-          ./lingo.rb -c #{cfg.path} < #{file}
-        }] }
-
-        cfg.unlink
+        begin
+          Dir.chdir(LINGO_BASE) { parse[%x{
+            #{Config::CONFIG['ruby_install_name']} lingo.rb -c "#{cfg.path}" < "#{file}"
+          }] }
+        ensure
+          cfg.unlink
+          temp.unlink if temp
+        end
 
         if temp
-          temp.unlink
-
           tokens, @tokens = @tokens[form], nil
           tokens
         else

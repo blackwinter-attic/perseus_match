@@ -38,13 +38,13 @@ class PerseusMatch
 
   DEFAULT_COEFF = 20
 
-  DISTANCE_SPEC = {
-    {}                   => 1,
-    { :excl => %w[a t] } => 1,
-    { :incl => 's'     } => 2,
-    { :incl => 'y'     } => 4,
-    { :sort => true    } => 4
-  }
+  DISTANCE_SPEC = [             # {
+    [{},                   1],  #   {}                   => 1,
+    [{ :excl => %w[a t] }, 1],  #   { :excl => %w[a t] } => 1,
+    [{ :incl => 's'     }, 2],  #   { :incl => 's'     } => 2,
+    [{ :incl => 'y'     }, 4],  #   { :incl => 'y'     } => 4,
+    [{ :sort => true    }, 4]   #   { :sort => true    } => 4
+  ]                             # }
 
   class << self
 
@@ -117,7 +117,7 @@ class PerseusMatch
   end
 
   def total_weight
-    distance_spec.values.inject(0.0) { |total, weight| total + weight }
+    @total_weight ||= distance_spec.inject(0.0) { |total, (_, weight)| total + weight }
   end
 
 end

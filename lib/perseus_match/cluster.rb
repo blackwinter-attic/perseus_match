@@ -30,10 +30,10 @@ class PerseusMatch
 
   class Cluster < Hash
 
-    def initialize(phrases = [])
+    def initialize(phrases = [], pm_options = {})
       super() { |h, k| h[k] = [] }
 
-      List.new(phrases).each { |pm| add(pm) }
+      List.new(phrases, pm_options).each { |pm| add(pm) }
     end
 
     def add(pm)

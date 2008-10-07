@@ -2,6 +2,7 @@
 
 require 'optparse'
 require 'benchmark'
+require 'yaml'
 
 require 'rubygems'
 require 'nuggets/numeric/duration'
@@ -14,9 +15,10 @@ USAGE = "Usage: #{$0} [-h|--help] [options] <file>"
 abort USAGE if ARGV.empty?
 
 options = {
-  :stats     => false,
+  :config    => nil,
   :threshold => 0,
-  :sort      => false
+  :sort      => false,
+  :stats     => false
 }
 
 OptionParser.new { |opts|
@@ -25,9 +27,13 @@ OptionParser.new { |opts|
   opts.separator ''
   opts.separator 'Options:'
 
-  opts.on('--stats', 'Output some statistics at the end') {
-    options[:stats] = true
+  opts.on('-c', '--config YAML', "Config file in YAML format") { |f|
+    abort "Can't find config file: #{f}." unless File.readable?(f)
+
+    options[:config] = f
   }
+
+  opts.separator ''
 
   opts.on('-t', '--threshold NUM', Float, "Similarity threshold [Default: #{options[:threshold]}]") { |t|
     options[:threshold] = t
@@ -35,6 +41,10 @@ OptionParser.new { |opts|
 
   opts.on('-s', '--sort', 'Sort results (considerably slower!)') {
     options[:sort] = true
+  }
+
+  opts.on('--stats', 'Output some statistics at the end') {
+    options[:stats] = true
   }
 
   opts.separator ''
@@ -59,12 +69,15 @@ PerseusMatch::TokenSet.tokenize(file)
 
 phrases = File.readlines(file).map { |line| line.chomp }
 
+pm_options = {}
+pm_options[:distance_spec] = YAML.load_file(options[:config]) if options[:config]
+
 threshold, count, count_all = options[:threshold], 0, 0
 
 action = options[:sort] ? lambda {
   require 'pp'
 
-  pp PerseusMatch::Cluster.new(phrases).sort { |pm|
+  pp PerseusMatch::Cluster.new(phrases, pm_options).sort { |pm|
     if pm.similarity >= threshold
       [pm.target, pm.distance, pm.similarity]
       count += 1
@@ -72,7 +85,7 @@ action = options[:sort] ? lambda {
     count_all += 1
   }.compact
 } : lambda {
-  PerseusMatch::List.pair(phrases) { |pm|
+  PerseusMatch::List.pair(phrases, pm_options) { |pm|
     if pm.similarity >= threshold
       p [pm.phrase, pm.target, pm.distance, pm.similarity]
       count += 1
