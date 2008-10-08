@@ -1,20 +1,24 @@
 --- 
-# default, as is
-- - {}
-  - 1
+:distance_spec:
 
-# ignore (exclude) adjectives and particles
-- - :excl: [a, t]
-  - 1
+  # default, as is
+  - - {}
+    - 1
 
-# consider (include) only substantives
-- - :incl: s
-  - 2
+  # ignore (exclude) adjectives and particles
+  - - :excl: [a, t]
+    - 1
 
-# consider (include) only synonyms
-- - :incl: y
-  - 4
+  # consider (include) only substantives
+  - - :incl: s
+    - 2
 
-# sort the tokens when comparing
-- - :sort: true
-  - 4
+  # consider (include) only synonyms
+  - - :incl: y
+    - 4
+
+  # sort the tokens when comparing
+  - - :sort: true
+    - 4
+
+:default_coeff: 20

@@ -82,8 +82,7 @@ PerseusMatch::TokenSet.tokenize(file)
 skip_re = %r{\A\s*(?:#|\z)}o
 phrases = File.readlines(file).map { |line| line.chomp unless line =~ skip_re }.compact
 
-pm_options = {}
-pm_options[:distance_spec] = YAML.load_file(options[:config]) if options[:config]
+pm_options = options[:config] ? YAML.load_file(options[:config]) : {}
 
 threshold, count, count_all = options[:threshold], 0, 0
 

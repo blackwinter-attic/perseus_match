@@ -28,27 +28,45 @@
 
 $KCODE = 'u'
 
-LINGO_BASE = '/home/jw/devel/lingo/trunk'
-
-LINGO_FOUND = File.readable?(File.join(LINGO_BASE, 'lingo.rb'))
-
-LINGO_CONFIG = {
-  'meeting' => {
-    'attendees' => [
-      { 'textreader'   => { 'files'=> 'STDIN' } },
-      { 'tokenizer'    => {  } },
-      { 'wordsearcher' => { 'source' => 'sys-dic', 'mode' => 'first' } },
-      { 'decomposer'   => { 'source' => 'sys-dic' } },
-      { 'multiworder'  => { 'source' => 'sys-mul', 'stopper' => 'PUNC,OTHR' } },
-      { 'synonymer'    => { 'source' => 'sys-syn', 'skip' => '?,t' } },
-      { 'debugger'     => { 'prompt' => '', 'eval' => 'true', 'ceval' => 'false' } }
-    ]
-  }
-}
-
 require 'pathname'
 require 'tempfile'
 require 'yaml'
+
+LINGO_BASE = ENV['PM_LINGO_BASE'] ||
+  File.readable?('LINGO_BASE') && File.read('LINGO_BASE').chomp
+
+LINGO_FOUND = File.readable?(File.join(LINGO_BASE, 'lingo.rb'))
+warn "lingo installation not found at #{LINGO_BASE} -- proceeding anyway" unless LINGO_FOUND
+
+LINGO_CONFIG = if File.readable?(file = ENV['PM_LINGO_CONFIG'] || 'lingo.cfg')
+  config = YAML.load_file(file)
+
+  config['meeting']['attendees'].unshift(
+    { 'textreader' => { 'files'=> 'STDIN' } }
+  )
+
+  config['meeting']['attendees'].push(
+    { 'debugger' => { 'prompt' => '', 'eval' => 'true', 'ceval' => 'false' } }
+  )
+
+  config
+else
+  warn "lingo config not found at #{ENV['PM_LINGO_CONFIG']} -- using default" if ENV.has_key?('PM_LINGO_CONFIG')
+
+  {
+    'meeting' => {
+      'attendees' => [
+        { 'textreader'   => { 'files'=> 'STDIN' } },
+        { 'tokenizer'    => {  } },
+        { 'wordsearcher' => { 'source' => 'sys-dic', 'mode' => 'first' } },
+        { 'decomposer'   => { 'source' => 'sys-dic' } },
+        { 'multiworder'  => { 'source' => 'sys-mul', 'stopper' => 'PUNC,OTHR' } },
+        { 'synonymer'    => { 'source' => 'sys-syn', 'skip' => '?,t' } },
+        { 'debugger'     => { 'prompt' => '', 'eval' => 'true', 'ceval' => 'false' } }
+      ]
+    }
+  }
+end
 
 # use enhanced Tempfile#make_tmpname, as of r13631
 if RUBY_RELEASE_DATE < '2007-10-05'

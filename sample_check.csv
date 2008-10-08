@@ -1,3 +1,5 @@
+# phrase,target,threshold[,operator (default: >)]
+
 "Anbetung der Könige","Die Anbetung der Könige",0.9
 "Anbetung der Könige","Die Anbetung der Heiligen Drei Könige",0.8
 "Anbetung der Könige","dIE AnBeTuNg der heILIGen dREI KÖniGE",0.8
