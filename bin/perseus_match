@@ -15,11 +15,12 @@ USAGE = "Usage: #{$0} [-h|--help] [options] <file>"
 abort USAGE if ARGV.empty?
 
 options = {
-  :config    => nil,
-  :threshold => 0,
-  :sort      => false,
-  :stats     => false,
-  :check     => false
+  :config      => nil,
+  :threshold   => 0,
+  :sort        => false,
+  :stats       => false,
+  :check       => false,
+  :failed_only => false
 }
 
 OptionParser.new { |opts|
@@ -44,14 +45,18 @@ OptionParser.new { |opts|
     options[:sort] = true
   }
 
-  opts.on('--stats', 'Output some statistics at the end') {
+  opts.on('-S', '--stats', 'Output some statistics at the end') {
     options[:stats] = true
   }
 
   opts.separator ''
 
-  opts.on('--check', 'Check pairs in input file (CSV) against', 'specified (or global) threshold') {
+  opts.on('-C', '--check', 'Check pairs in input file (CSV) against', 'specified (or global) threshold') {
     options[:check] = true
+  }
+
+  opts.on('-f', '--failed', 'Print only failed checks') {
+    options[:failed_only] = true
   }
 
   opts.separator ''
@@ -88,23 +93,24 @@ action = if options[:check]
   phrases.sort! if options[:sort]
   phrases.map! { |line| [line, FasterCSV.parse_line(line)] }
 
+  global_threshold = options[:threshold]
+  failed_only      = options[:failed_only]
+
   lambda {
     phrases.each { |line, spec|
       phrase, target, threshold, operator, _ = *spec
 
-      threshold ||= options[:threshold]
+      threshold ||= global_threshold
       operator  ||= :>
 
-      res = begin
+      begin
         PerseusMatch.check!(phrase, target, threshold.to_f, operator, pm_options)
         count += 1
-        'OK'
+        puts "#{line} [OK]" unless failed_only
       rescue PerseusMatch::CheckFailedError => err
-        "FAILED -- #{err.value}"
+        puts "#{line} [FAILED -- #{err.value}]"
       end
       count_all += 1
-
-      puts "#{line} [#{res}]"
     }
   }
 else
@@ -114,11 +120,12 @@ else
 
       pp PerseusMatch::Cluster.new(phrases, pm_options).sort { |pm|
         if pm.similarity >= threshold
-          [pm.target, pm.distance, pm.similarity]
+          res = [pm.target, pm.distance, pm.similarity]
           count += 1
         end
         count_all += 1
-      }.compact
+        res
+      }.map { |i| i.map { |j| j.is_a?(Array) ? j.compact : j } }
     }
   else
     lambda {

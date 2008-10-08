@@ -88,8 +88,11 @@ class PerseusMatch
             when /<(.*?)\s=\s\[(.*)\]>/
               a, b = $1, $2
               @_tokens[a.sub(/\|.*/, '')] ||= b.scan(/\((.*?)\+?\)/).flatten
-            #when /<(.*)>/, /:(.*):/
-            #  # ignore
+            when /<(.*)>/, /:(.*):/
+              a, b = $1, $1.dup
+              @_tokens[a.sub!(/[\/|].*/, '')] ||= b
+
+              warn "UNK: #{a} [#{res.strip}]" if b =~ /\|\?\z/
           end
         }
       }
