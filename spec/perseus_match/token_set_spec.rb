@@ -1,4 +1,4 @@
-describe PerseusMatch::TokenSet do
+describe PerseusMatch::TokenSet, ' with lingo' do
 
   before :each do
     PerseusMatch::TokenSet.instance_variable_set(:@tokens, nil)
@@ -6,7 +6,30 @@ describe PerseusMatch::TokenSet do
 
   it 'should tokenize a string' do
     PerseusMatch::TokenSet.tokenize('foo bar').should be_an_instance_of(PerseusMatch::TokenSet)
-  end if LINGO_FOUND
+  end
+
+  it 'should be intersectable' do
+    t1 = PerseusMatch::TokenSet.new('abc def ghi')
+    t2 = PerseusMatch::TokenSet.new('abc def abc')
+
+    is = t1.intersect(t2)
+
+    is.grep(/abc/).size.should == 2
+    is.grep(/def/).size.should == 1
+    is.grep(/ghi/).size.should == 0
+  end
+
+  it 'should include form in inspect' do
+    PerseusMatch::TokenSet.new('foo', []).inspect.to_s.should =~ /<foo>/
+  end
+
+end if LINGO_FOUND
+
+describe PerseusMatch::TokenSet, ' without lingo' do
+
+  before :each do
+    PerseusMatch::TokenSet.instance_variable_set(:@tokens, nil)
+  end
 
   it 'should take a prepared file for tokenization' do
     # prevent lingo from being used
@@ -32,10 +55,6 @@ describe PerseusMatch::TokenSet do
 
     # reset lingo base
     LINGO_BASE.replace(lingo_base)
-  end
-
-  it 'should include form in inspect' do
-    PerseusMatch::TokenSet.new('foo', []).inspect.to_s.should =~ /<foo>/
   end
 
 end

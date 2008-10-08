@@ -110,21 +110,19 @@ class PerseusMatch
     return Infinity if phrase_tokens.disjoint?(target_tokens)
     return 0        if phrase_tokens == target_tokens
 
-    distance_spec.inject(0) { |distance, (options, weight)|
-      distance + token_distance(options) * weight
-    }
+    distance_spec.inject(0) { |distance, spec| distance + token_distance(*spec) }
   end
 
-  def token_distance(options = {})
-    phrase_tokens = self.phrase_tokens.inclexcl(options)
-    target_tokens = self.target_tokens.inclexcl(options)
+  def token_distance(options = {}, weight = 1)
+    tokens1 = phrase_tokens.inclexcl(options)
+    tokens2 = target_tokens.inclexcl(options)
 
     if options[:sort]
-      phrase_tokens.sort!
-      target_tokens.sort!
+      tokens1.sort!
+      tokens2.sort!
     end
 
-    (phrase_tokens.distance(target_tokens) + target_tokens.distance(phrase_tokens)) / 2.0
+    tokens1.distance(tokens2, weight)
   end
 
   def total_weight

@@ -164,18 +164,38 @@ class PerseusMatch
       @tokens = to_a.flatten
     end
 
-    def distance(other)
-      distance, index, max = xor(other).size, -1, size
+    def distance(other, weight = 1)
+      tokens1, tokens2 = tokens, other.tokens
+      size1, size2 = tokens1.size, tokens2.size
 
-      intersect(other).each { |token|
-        while current = other.tokens[index += 1] and current != token
-          distance += 1
+      return size2 if tokens1.empty?
+      return size1 if tokens2.empty?
 
-          break if index > max
-        end
+      # make sure size1 <= size2, to use O(min(size1, size2)) space
+      if size1 > size2
+        tokens1, tokens2 = tokens2, tokens1
+        size1, size2 = size2, size1
+      end
+
+      costs, fill = (0..size1 + 1).to_a, [0] * size1
+
+      0.upto(size2) { |index2|
+        token2, previous, costs = tokens2[index2], costs, [index2 + 1, *fill]
+
+        0.upto(size1) { |index1|
+          penalty = token2 == tokens1[index1] ? 0 : weight
+
+          # rcov hack :-(
+          _ = [
+            previous[index1 + 1] + 1,   # insertion
+            costs[index1] + 1,          # deletion
+            previous[index1] + penalty  # substitution
+          ]
+          costs[index1 + 1] = _.min
+        }
       }
 
-      distance
+      costs[size1] + xor(other).size
     end
 
     def tokens(wc = true)
