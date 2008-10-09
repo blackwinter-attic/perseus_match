@@ -3,8 +3,10 @@
 require 'optparse'
 require 'benchmark'
 require 'yaml'
+require 'jcode'
 
 require 'rubygems'
+require 'nuggets/enumerable/minmax'
 require 'nuggets/numeric/duration'
 
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
@@ -89,6 +91,11 @@ threshold, count, count_all = options[:threshold], 0, 0
 action = if options[:check]
   require 'fastercsv'
 
+  width  = phrases.max(:jlength)
+  format = lambda { |line, res|
+    "%-#{width + line.length - line.jlength}s [%s]" % [line, res]
+  }
+
   phrases.sort! if options[:sort]
   phrases.map! { |line| [line, FasterCSV.parse_line(line)] }
 
@@ -105,9 +112,9 @@ action = if options[:check]
       begin
         PerseusMatch.check!(phrase, target, threshold.to_f, operator, pm_options)
         count += 1
-        puts "#{line} [OK]" unless failed_only
+        puts format[line, 'OK'] unless failed_only
       rescue PerseusMatch::CheckFailedError => err
-        puts "#{line} [FAILED -- #{err.value}]"
+        puts format[line, "FAILED -- #{err.value}"]
       end
       count_all += 1
     }
