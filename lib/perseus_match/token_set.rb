@@ -116,7 +116,7 @@ class PerseusMatch
               @_tokens[a.sub(/\|.*/, '')] ||= b.scan(/\((.*?)\+?\)/).flatten
             when /<(.*)>/, /:(.*):/
               a, b = $1, $1.dup
-              @_tokens[a.sub!(/[\/|].*/, '')] ||= b
+              @_tokens[a.sub!(/[\/|].*/, '')] ||= [b]
 
               warn "UNK: #{a} [#{res.strip}]" if b =~ /\|\?\z/
           end
