@@ -2,23 +2,27 @@
 :distance_spec:
 
   # default, as is
-  - - {}
-    - 1
+#  - - {}
+#    - 1
 
   # ignore (exclude) adjectives and particles
   - - :excl: [a, t]
-    - 1
+    - 2
 
   # consider (include) only substantives
   - - :incl: s
-    - 2
+    - 3
 
   # consider (include) only synonyms
-  - - :incl: y
-    - 4
+#  - - :incl: y
+#    - 4
 
   # sort the tokens when comparing
-  - - :sort: true
+#  - - :sort: true
+#    - 4
+
+  # replace tokens by their soundex value
+  - - :soundex: true
     - 4
 
 :default_coeff: 20

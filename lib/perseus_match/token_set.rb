@@ -29,8 +29,16 @@
 $KCODE = 'u'
 
 require 'pathname'
+require 'rbconfig'
 require 'tempfile'
 require 'yaml'
+
+begin
+  require 'rubygems'
+  require 'text/soundex'
+rescue LoadError
+  warn "could not load the Text gem -- soundex functionality will not be available"
+end
 
 LINGO_BASE = ENV['PM_LINGO_BASE'] ||
   File.readable?('LINGO_BASE') && File.read('LINGO_BASE').chomp
@@ -233,15 +241,27 @@ class PerseusMatch
     end
 
     def incl(*wc)
-      (@incl ||= {})[wc = [*wc].compact] ||= map { |tokens|
-        tokens.reject { |token| !match?(token, wc) }
+      (@incl ||= {})[wc = [*wc].compact] ||= select { |token|
+        match?(token, wc)
       }.to_token_set(form)
     end
 
     def excl(*wc)
-      (@excl ||= {})[wc = [*wc].compact] ||= map { |tokens|
-        tokens.reject { |token| match?(token, wc) }
+      (@excl ||= {})[wc = [*wc].compact] ||= reject { |token|
+        match?(token, wc)
       }.to_token_set(form)
+    end
+
+    def soundex
+      raise "soundex functionality not available" unless defined?(Text::Soundex)
+
+      @soundex ||= map { |token|
+        token.sub(/(.*)(?=[\/|])/) { |m| Text::Soundex.soundex(m) }
+      }.to_token_set(form)
+    end
+
+    def soundex!
+      replace soundex
     end
 
     def count(token)

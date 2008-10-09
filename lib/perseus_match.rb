@@ -38,13 +38,14 @@ class PerseusMatch
 
   DEFAULT_COEFF = 20
 
-  DISTANCE_SPEC = [             # {
-    [{},                   1],  #   {}                   => 1,
-    [{ :excl => %w[a t] }, 1],  #   { :excl => %w[a t] } => 1,
-    [{ :incl => 's'     }, 2],  #   { :incl => 's'     } => 2,
-    [{ :incl => 'y'     }, 4],  #   { :incl => 'y'     } => 4,
-    [{ :sort => true    }, 4]   #   { :sort => true    } => 4
-  ]                             # }
+  DISTANCE_SPEC = [                # {
+    [{},                      1],  #   {}                      => 1,
+    [{ :excl    => %w[a t] }, 2],  #   { :excl    => %w[a t] } => 1,
+    [{ :incl    => 's'     }, 3],  #   { :incl    => 's'     } => 2,
+    [{ :incl    => 'y'     }, 4],  #   { :incl    => 'y'     } => 4,
+    [{ :sort    => true    }, 4],  #   { :sort    => true    } => 4,
+    [{ :soundex => true    }, 4]   #   { :soundex => true    } => 8
+  ]                                # }
 
   class << self
 
@@ -120,6 +121,11 @@ class PerseusMatch
     if options[:sort]
       tokens1.sort!
       tokens2.sort!
+    end
+
+    if options[:soundex]
+      tokens1.soundex!
+      tokens2.soundex!
     end
 
     tokens1.distance(tokens2, weight)
