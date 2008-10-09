@@ -22,7 +22,8 @@ options = {
   :sort        => false,
   :stats       => false,
   :check       => false,
-  :failed_only => false
+  :failed_only => false,
+  :align       => false
 }
 
 OptionParser.new { |opts|
@@ -61,6 +62,10 @@ OptionParser.new { |opts|
     options[:failed_only] = true
   }
 
+  opts.on('-a', '--align', 'Align check results') {
+    options[:align] = true
+  }
+
   opts.separator ''
   opts.separator 'Generic options:'
 
@@ -91,10 +96,16 @@ threshold, count, count_all = options[:threshold], 0, 0
 action = if options[:check]
   require 'fastercsv'
 
-  width  = phrases.max(:jlength)
-  format = lambda { |line, res|
-    "%-#{width + line.length - line.jlength}s [%s]" % [line, res]
-  }
+  if options[:align]
+    width  = phrases.max(:jlength) + 4
+    format = lambda { |line, res|
+      "#{line} #{'.' * (width - line.jlength)} [#{res}]"
+    }
+  else
+    format = lambda { |line, res|
+      "#{line} [#{res}]"
+    }
+  end
 
   phrases.sort! if options[:sort]
   phrases.map! { |line| [line, FasterCSV.parse_line(line)] }
