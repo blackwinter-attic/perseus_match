@@ -30,11 +30,12 @@ $KCODE = 'u'
 
 require 'pathname'
 require 'rbconfig'
-require 'tempfile'
 require 'yaml'
 
+require 'rubygems'
+require 'nuggets/tempfile'
+
 begin
-  require 'rubygems'
   require 'text/soundex'
 rescue LoadError
   warn "could not load the Text gem -- soundex functionality will not be available"
@@ -46,55 +47,30 @@ LINGO_BASE = ENV['PM_LINGO_BASE'] ||
 LINGO_FOUND = File.readable?(File.join(LINGO_BASE, 'lingo.rb'))
 warn "lingo installation not found at #{LINGO_BASE} -- proceeding anyway" unless LINGO_FOUND
 
-LINGO_CONFIG = if File.readable?(file = ENV['PM_LINGO_CONFIG'] || 'lingo.cfg')
-  config = YAML.load_file(file)
-
-  config['meeting']['attendees'].unshift(
-    { 'textreader' => { 'files'=> 'STDIN' } }
-  )
-
-  config['meeting']['attendees'].push(
-    { 'debugger' => { 'prompt' => '', 'eval' => 'true', 'ceval' => 'false' } }
-  )
-
-  config
+lingo_config = if File.readable?(file = ENV['PM_LINGO_CONFIG'] || 'lingo.cfg')
+  YAML.load_file(file)
 else
   warn "lingo config not found at #{ENV['PM_LINGO_CONFIG']} -- using default" if ENV.has_key?('PM_LINGO_CONFIG')
 
   {
     'meeting' => {
       'attendees' => [
-        { 'textreader'   => { 'files'=> 'STDIN' } },
         { 'tokenizer'    => {  } },
         { 'wordsearcher' => { 'source' => 'sys-dic', 'mode' => 'first' } },
         { 'decomposer'   => { 'source' => 'sys-dic' } },
         { 'multiworder'  => { 'source' => 'sys-mul', 'stopper' => 'PUNC,OTHR' } },
         { 'synonymer'    => { 'source' => 'sys-syn', 'skip' => '?,t' } },
-        { 'debugger'     => { 'prompt' => '', 'eval' => 'true', 'ceval' => 'false' } }
       ]
     }
   }
 end
 
-# use enhanced Tempfile#make_tmpname, as of r13631
-if RUBY_RELEASE_DATE < '2007-10-05'
-  class Tempfile
+lingo_config['meeting']['attendees'].
+  unshift({ 'textreader' => { 'files'=> 'STDIN' } }).
+  push({ 'debugger' => { 'prompt' => '', 'eval' => 'true', 'ceval' => 'false' } })
 
-    def make_tmpname(basename, n)
-      case basename
-      when Array
-        prefix, suffix = *basename
-      else
-        prefix, suffix = basename, ''
-      end
+LINGO_CONFIG = lingo_config
 
-      t = Time.now.strftime("%Y%m%d")
-      path = "#{prefix}#{t}-#{$$}-#{rand(0x100000000).to_s(36)}-#{n}#{suffix}"
-    end
-
-  end
-end
- 
 class PerseusMatch
 
   class TokenSet < Array
@@ -127,16 +103,16 @@ class PerseusMatch
       else
         raise "lingo installation not found at #{LINGO_BASE}" unless LINGO_FOUND
 
-        cfg = Tempfile.new(['perseus_match_lingo', '.cfg'])
-        YAML.dump(LINGO_CONFIG, cfg)
-        cfg.close
+        cfg = Tempfile.open(['perseus_match_lingo', '.cfg']) { |t|
+          YAML.dump(LINGO_CONFIG, t)
+        }
 
         file = Pathname.new(form).absolute? ? form : File.join(Dir.pwd, form)
 
         unless File.file?(file) && File.readable?(file)
-          temp = Tempfile.new('perseus_match_temp')
-          temp.puts form
-          temp.close
+          temp = Tempfile.open('perseus_match_temp') { |t|
+            t.puts form
+          }
 
           file = temp.path
         end

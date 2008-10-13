@@ -33,7 +33,7 @@ class PerseusMatch
     def initialize(phrases = [], pm_options = {})
       super() { |h, k| h[k] = [] }
 
-      List.new(phrases, pm_options).each { |pm| add(pm) }
+      List.pair(phrases, pm_options) { |pm| add(pm) }
     end
 
     def add(pm)
@@ -42,7 +42,7 @@ class PerseusMatch
 
     alias_method :<<, :add
 
-    def sort_by(attribute, *args, &block)
+    def sort_by(attribute, *args)
       options = args.last.is_a?(Hash) ? args.pop : {}
 
       _ = map { |phrase, matches|
@@ -71,7 +71,7 @@ class PerseusMatch
         end
 
         # transform entries if so requested
-        matches.map!(&block) if block
+        matches.map! { |match| yield(match) } if block_given?
 
         [phrase, matches]
       }.sort
@@ -79,8 +79,9 @@ class PerseusMatch
       _  # rcov hack :-(
     end
 
-    def sort(options = {}, &block)
-      sort_by(:similarity, options.delete(:coeff), options, &block)
+    def sort(options = {})
+      args = [:similarity, options.delete(:coeff), options]
+      block_given? ? sort_by(*args) { |*a| yield(*a) } : sort_by(*args)
     end
 
     def rank(options = {})

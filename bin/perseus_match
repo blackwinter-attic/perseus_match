@@ -53,6 +53,8 @@ OptionParser.new { |opts|
   }
 
   opts.separator ''
+  opts.separator '  * Checking pairs'
+  opts.separator ''
 
   opts.on('-C', '--check', 'Check pairs in input file (CSV) against', 'specified (or global) threshold') {
     options[:check] = true
@@ -97,7 +99,7 @@ action = if options[:check]
   require 'fastercsv'
 
   if options[:align]
-    width  = phrases.max(:jlength) + 4
+    width  = phrases.max(:jlength) + 3
     format = lambda { |line, res|
       "#{line} #{'.' * (width - line.jlength)} [#{res}]"
     }
@@ -132,9 +134,9 @@ action = if options[:check]
   }
 else
   if options[:sort]
-    lambda {
-      require 'pp'
+    require 'pp'
 
+    lambda {
       pp PerseusMatch::Cluster.new(phrases, pm_options).sort { |pm|
         if pm.similarity >= threshold
           res = [pm.target, pm.distance, pm.similarity]

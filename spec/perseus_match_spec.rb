@@ -32,9 +32,9 @@ describe PerseusMatch do
       ''
     ]
 
-    temp = Tempfile.new('perseus_match_spec_temp')
-    temp.puts *phrases
-    temp.close
+    temp = Tempfile.open('perseus_match_spec_temp') { |t|
+      t.puts *phrases
+    }
 
     PerseusMatch::TokenSet.tokenize(temp.path)
 

@@ -35,20 +35,25 @@ class PerseusMatch
       def pair(phrases, pm_options = {})
         phrases.uniq!
 
+        pairs = [] unless block_given?
+
         phrases.each { |phrase|
           phrases.each { |target|
-            yield PerseusMatch.new(phrase, target, pm_options)
+            pm = PerseusMatch.new(phrase, target, pm_options)
+            block_given? ? yield(pm) : pairs << pm
           }
         }
+
+        pairs || phrases
       end
 
     end
 
-    alias_method :add, :push
-
     def initialize(phrases = [], pm_options = {})
       self.class.pair(phrases, pm_options) { |pm| add(pm) }
     end
+
+    alias_method :add, :push
 
   end
 

@@ -36,9 +36,9 @@ describe PerseusMatch::TokenSet, ' without lingo' do
     lingo_base = LINGO_BASE.dup
     LINGO_BASE.replace('')
 
-    temp = Tempfile.new('perseus_match_spec_tokens_temp')
-    temp.puts *%w[<foo|?> <bar|?>]
-    temp.close
+    temp = Tempfile.open('perseus_match_spec_tokens_temp') { |t|
+      t.puts *%w[<foo|?> <bar|?>]
+    }
 
     path = temp.path
     link = 'perseus.tokens'
