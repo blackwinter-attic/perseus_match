@@ -51,18 +51,18 @@ describe PerseusMatch do
     }
   end
 
-  it 'should identify case-insensitively identical (non-empty) strings as identical' do
+  it 'should identify case-insensitively identical (non-empty) strings as nearly identical' do
     @matchings.each { |matching|
       if !matching.phrase.empty? && matching.phrase.replace_diacritics.downcase == matching.target.replace_diacritics.downcase
-        inform_on_error(matching) { matching.similarity.should == 1.0 }
+        inform_on_error(matching) { matching.similarity.should > 0.95 }
       end
     }
   end
 
-  it 'should identify *only* case-insensitively identical (non-empty) strings as identical' do
+  it 'should identify *only* case-insensitively identical (non-empty) strings as nearly identical' do
     @matchings.each { |matching|
       if !matching.phrase.empty? && matching.phrase.replace_diacritics.downcase != matching.target.replace_diacritics.downcase
-        inform_on_error(matching) { matching.similarity.should < 1.0 }
+        inform_on_error(matching) { matching.similarity.should < 0.98 }
       end
     }
   end
@@ -141,6 +141,10 @@ describe PerseusMatch do
         similarities[[matching.phrase, matching.target]] = matching.similarity
       end
     }
+  end
+
+  it 'should calculate pair distance' do
+    PerseusMatch.distance('foo', 'bar').class.should < Numeric
   end
 
   it 'should be clusterable' do

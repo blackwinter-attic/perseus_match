@@ -8,15 +8,20 @@ describe PerseusMatch::TokenSet, ' with lingo' do
     PerseusMatch::TokenSet.tokenize('foo bar').should be_an_instance_of(PerseusMatch::TokenSet)
   end
 
-  it 'should be intersectable' do
-    t1 = PerseusMatch::TokenSet.new('abc def ghi')
-    t2 = PerseusMatch::TokenSet.new('abc def abc')
+  it 'should report strictly equal TokenSets as ==' do
+    PerseusMatch::TokenSet.new('foo bar').should == PerseusMatch::TokenSet.new('foo bar')
+  end
 
-    is = t1.intersect(t2)
+  it 'should report strictly equal TokenSets as eql' do
+    PerseusMatch::TokenSet.new('foo bar').should be_eql(PerseusMatch::TokenSet.new('foo bar'))
+  end
 
-    is.grep(/abc/).size.should == 2
-    is.grep(/def/).size.should == 1
-    is.grep(/ghi/).size.should == 0
+  it 'should report slightly equal TokenSets as ==' do
+    PerseusMatch::TokenSet.new('foo bar').should == PerseusMatch::TokenSet.new('Foo Bar')
+  end
+
+  it 'should *not* report slightly equal TokenSets as eql' do
+    PerseusMatch::TokenSet.new('foo bar').should_not be_eql(PerseusMatch::TokenSet.new('Foo Bar'))
   end
 
   it 'should include form in inspect' do

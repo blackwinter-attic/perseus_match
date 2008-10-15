@@ -49,6 +49,10 @@ class PerseusMatch
 
   class << self
 
+    def distance(*args)
+      new(*args).distance
+    end
+
     def match(phrases, pm_options = {})
       List.new(phrases, pm_options)
     end
@@ -109,12 +113,14 @@ class PerseusMatch
 
   def calculate_distance
     return Infinity if phrase_tokens.disjoint?(target_tokens)
-    return 0        if phrase_tokens == target_tokens
+    return 0        if phrase_tokens.eql?(target_tokens)
 
-    distance_spec.inject(0) { |distance, spec| distance + token_distance(*spec) }
+    distance_spec.inject(0) { |distance, (options, weight)|
+      distance + token_distance(options) * weight
+    }
   end
 
-  def token_distance(options = {}, weight = 1)
+  def token_distance(options = {})
     tokens1 = phrase_tokens.inclexcl(options)
     tokens2 = target_tokens.inclexcl(options)
 
@@ -128,7 +134,7 @@ class PerseusMatch
       tokens2.soundex!
     end
 
-    tokens1.distance(tokens2, weight)
+    tokens1.distance(tokens2)
   end
 
   def total_weight

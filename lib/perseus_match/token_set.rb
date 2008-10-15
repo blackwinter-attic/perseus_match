@@ -34,6 +34,7 @@ require 'yaml'
 
 require 'rubygems'
 require 'nuggets/tempfile'
+require 'nuggets/util/i18n'
 
 begin
   require 'text/soundex'
@@ -79,7 +80,7 @@ class PerseusMatch
       return @tokens[form] if @tokens
 
       @_tokens, @tokens = {}, Hash.new { |h, k| h[k] = new(
-        k, (@_tokens[k] || []) + k.scan(/\w+/).map { |i| @_tokens[i] }.flatten.compact
+        k, (@_tokens[k] || []) | k.scan(/\w+/).map { |i| @_tokens[i] }.flatten.compact
       )}
 
       parse = lambda { |x|
@@ -90,7 +91,7 @@ class PerseusMatch
               @_tokens[a.sub(/\|.*/, '')] ||= b.scan(/\((.*?)\+?\)/).flatten
             when /<(.*)>/, /:(.*):/
               a, b = $1, $1.dup
-              @_tokens[a.sub!(/[\/|].*/, '')] ||= [b]
+              @_tokens[a.sub!(/[\/|].*/, '')] ||= [b.replace_diacritics.downcase]
 
               warn "UNK: #{a} [#{res.strip}]" if b =~ /\|\?\z/
           end
@@ -146,63 +147,41 @@ class PerseusMatch
       @tokens = to_a.flatten
     end
 
-    def distance(other, weight = 1)
+    def distance(other)
       tokens1, tokens2 = tokens, other.tokens
       size1, size2 = tokens1.size, tokens2.size
 
       return size2 if tokens1.empty?
       return size1 if tokens2.empty?
 
-      # make sure size1 <= size2, to use O(min(size1, size2)) space
-      if size1 > size2
-        tokens1, tokens2 = tokens2, tokens1
-        size1, size2 = size2, size1
-      end
+      distance, costs = nil, (0..size2).to_a
 
-      costs, fill = (0..size1 + 1).to_a, [0] * size1
+      0.upto(size1 - 1) { |index1|
+        token1, cost = tokens1[index1], index1 + 1
 
-      0.upto(size2) { |index2|
-        token2, previous, costs = tokens2[index2], costs, [index2 + 1, *fill]
-
-        0.upto(size1) { |index1|
-          penalty = token2 == tokens1[index1] ? 0 : weight
+        0.upto(size2 - 1) { |index2|
+          penalty = token1 == tokens2[index2] ? 0 : 1
 
           # rcov hack :-(
           _ = [
-            previous[index1 + 1] + 1,   # insertion
-            costs[index1] + 1,          # deletion
-            previous[index1] + penalty  # substitution
+            costs[index2 + 1] + 1,   # insertion
+            cost + 1,                # deletion
+            costs[index2] + penalty  # substitution
           ]
-          costs[index1 + 1] = _.min
+          distance = _.min
+
+          costs[index2], cost = cost, distance
         }
+
+        costs[size2] = distance
       }
 
-      costs[size1] + xor(other).size
+      distance + 1  # > 0 !?!
     end
 
     def tokens(wc = true)
       wc ? @tokens : @tokens_sans_wc ||= @tokens.map { |token|
         token.sub(%r{[/|].*?\z}, '')
-      }
-    end
-
-    def &(other)
-      tokens & other.tokens
-    end
-
-    def |(other)
-      tokens | other.tokens
-    end
-
-    def intersect(other)
-      (self & other).inject([]) { |memo, token|
-        memo + [token] * [count(token), other.count(token)].max
-      }
-    end
-
-    def xor(other)
-      ((self | other) - (self & other)).inject([]) { |memo, token|
-        memo + [token] * (count(token) + other.count(token))
       }
     end
 
@@ -238,15 +217,8 @@ class PerseusMatch
       replace soundex
     end
 
-    def count(token)
-      counts[token]
-    end
-
-    def counts
-      @counts ||= tokens.inject(Hash.new(0)) { |counts, token|
-        counts[token] += 1
-        counts
-      }
+    def eql?(other)
+      tokens == other.tokens && form == other.form
     end
 
     def inspect
