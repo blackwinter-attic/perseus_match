@@ -20,6 +20,7 @@ options = {
   :config      => nil,
   :threshold   => 0,
   :sort        => false,
+  :lingo       => false,
   :stats       => false,
   :check       => false,
   :failed_only => false,
@@ -46,6 +47,10 @@ OptionParser.new { |opts|
 
   opts.on('-s', '--sort', 'Sort results (considerably slower!)') {
     options[:sort] = true
+  }
+
+  opts.on('-l', '--lingo', 'Output results in lingo dictionary format') {
+    options[:lingo] = true
   }
 
   opts.on('-S', '--stats', 'Output some statistics at the end') {
@@ -133,13 +138,18 @@ action = if options[:check]
     }
   }
 else
+  format =
+    options[:lingo] ? lambda { |pm| "#{pm.phrase}*#{pm.target}" } :
+    options[:sort]  ? lambda { |pm| [pm.target, pm.distance, pm.similarity] } :
+                      lambda { |pm| [pm.phrase, pm.target, pm.distance, pm.similarity].inspect }
+
   if options[:sort]
     require 'pp'
 
     lambda {
       pp PerseusMatch::Cluster.new(phrases, pm_options).sort { |pm|
         if pm.similarity >= threshold
-          res = [pm.target, pm.distance, pm.similarity]
+          res = format[pm]
           count += 1
         end
         count_all += 1
@@ -150,7 +160,7 @@ else
     lambda {
       PerseusMatch::List.pair(phrases, pm_options) { |pm|
         if pm.similarity >= threshold
-          p [pm.phrase, pm.target, pm.distance, pm.similarity]
+          puts format[pm]
           count += 1
         end
         count_all += 1
