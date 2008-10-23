@@ -3,7 +3,6 @@
 require 'optparse'
 require 'benchmark'
 require 'yaml'
-require 'jcode'
 
 require 'rubygems'
 require 'nuggets/enumerable/minmax'
@@ -99,7 +98,11 @@ end
 PerseusMatch::TokenSet.tokenize(file)
 
 skip_re = %r{\A\s*(?:#|\z)}o
-phrases = File.readlines(file).map { |line| line.chomp unless line =~ skip_re }.compact
+phrases = []
+
+File.open(file).each { |line|
+  phrases << line.chomp unless line =~ skip_re
+}.close
 
 pm_options = options[:config] ? YAML.load_file(options[:config]) : {}
 list_options = { :minimal => options[:minimal] }
@@ -109,13 +112,16 @@ threshold, count, count_all = options[:threshold], 0, 0
 action = if options[:check]
   require 'fastercsv'
 
-  if options[:align]
-    width  = phrases.max(:jlength) + 3
-    format = lambda { |line, res|
+  format = if options[:align]
+    require 'jcode'
+
+    width = phrases.max(:jlength) + 3
+
+    lambda { |line, res|
       "#{line} #{'.' * (width - line.jlength)} [#{res}]"
     }
   else
-    format = lambda { |line, res|
+    lambda { |line, res|
       "#{line} [#{res}]"
     }
   end
