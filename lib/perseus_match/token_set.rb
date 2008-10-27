@@ -33,6 +33,7 @@ require 'rbconfig'
 require 'yaml'
 
 require 'rubygems'
+require 'backports/tempfile'
 require 'nuggets/tempfile'
 require 'nuggets/util/i18n'
 
