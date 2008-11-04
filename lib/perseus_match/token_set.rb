@@ -43,8 +43,9 @@ rescue LoadError
   warn "could not load the Text gem -- soundex functionality will not be available"
 end
 
-LINGO_BASE = ENV['PM_LINGO_BASE'] ||
-  File.readable?('LINGO_BASE') && File.read('LINGO_BASE').chomp
+LINGO_BASE = ENV['PM_LINGO_BASE'] || (
+  File.readable?('LINGO_BASE') ? File.read('LINGO_BASE').chomp : '.'
+)
 
 LINGO_FOUND = File.readable?(File.join(LINGO_BASE, 'lingo.rb'))
 warn "lingo installation not found at #{LINGO_BASE} -- proceeding anyway" unless LINGO_FOUND
