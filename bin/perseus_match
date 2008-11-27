@@ -18,10 +18,10 @@ abort USAGE if ARGV.empty?
 options = {
   :config      => nil,
   :threshold   => 0,
-  :minimal     => false,
   :sort        => false,
-  :lingo       => false,
   :stats       => false,
+  :lingo       => false,
+  :minimal     => false,
   :check       => false,
   :failed_only => false,
   :align       => false
@@ -30,7 +30,7 @@ options = {
 OptionParser.new { |opts|
   opts.banner = USAGE
 
-  opts.separator ''
+  opts.separator ' '
   opts.separator 'Options:'
 
   opts.on('-c', '--config YAML', 'Config file in YAML format') { |f|
@@ -39,31 +39,37 @@ OptionParser.new { |opts|
     options[:config] = f
   }
 
-  opts.separator ''
-
   opts.on('-t', '--threshold NUM', Float, "Similarity threshold [Default: #{options[:threshold]}]") { |t|
     options[:threshold] = t
-  }
-
-  opts.on('-m', '--minimal', 'Produce minimal pairs only') {
-    options[:minimal] = true
   }
 
   opts.on('-s', '--sort', 'Sort results (considerably slower!)') {
     options[:sort] = true
   }
 
-  opts.on('-l', '--lingo', 'Output results in lingo dictionary format') {
-    options[:lingo] = true
-  }
-
   opts.on('-S', '--stats', 'Output some statistics at the end') {
     options[:stats] = true
   }
 
-  opts.separator ''
+  opts.on('-v', '--verbose', 'Print additional information during processing') {
+    options[:verbose] = true
+  }
+
+  opts.separator ' '
+  opts.separator '  * Calculating similarities (default)'
+  opts.separator ' '
+
+  opts.on('-m', '--minimal', 'Produce minimal pairs only') {
+    options[:minimal] = true
+  }
+
+  opts.on('-l', '--lingo', 'Output results in lingo dictionary format') {
+    options[:lingo] = true
+  }
+
+  opts.separator ' '
   opts.separator '  * Checking pairs'
-  opts.separator ''
+  opts.separator ' '
 
   opts.on('-C', '--check', 'Check pairs in input file (CSV) against', 'specified (or global) threshold') {
     options[:check] = true
@@ -77,7 +83,7 @@ OptionParser.new { |opts|
     options[:align] = true
   }
 
-  opts.separator ''
+  opts.separator ' '
   opts.separator 'Generic options:'
 
   opts.on('-h', '--help', 'Print this help message and exit') {
@@ -105,6 +111,7 @@ File.open(file).each { |line|
 }.close
 
 pm_options = options[:config] ? YAML.load_file(options[:config]) : {}
+pm_options[:verbose] = options[:verbose] if options.has_key?(:verbose)
 list_options = { :minimal => options[:minimal] }
 
 threshold, count, count_all = options[:threshold], 0, 0

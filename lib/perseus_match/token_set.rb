@@ -211,7 +211,7 @@ class PerseusMatch
       raise "soundex functionality not available" unless defined?(Text::Soundex)
 
       @soundex ||= map { |token|
-        token.sub(/(.*)(?=[\/|])/) { |m| Text::Soundex.soundex(m) }
+        token.sub(/(.*)(?=[\/|])/) { |m| Text::Soundex.soundex(m.replace_diacritics) }
       }.to_token_set(form)
     end
 

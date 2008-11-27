@@ -74,7 +74,7 @@ class PerseusMatch
 
   end
 
-  attr_reader :phrase, :target, :distance_spec, :default_coeff
+  attr_reader :phrase, :target, :distance_spec, :default_coeff, :verbose
 
   def initialize(phrase, target, options = {})
     @phrase = phrase.to_s
@@ -82,6 +82,8 @@ class PerseusMatch
 
     @default_coeff = options[:default_coeff] || DEFAULT_COEFF
     @distance_spec = options[:distance_spec] || DISTANCE_SPEC
+
+    @verbose = options[:verbose]
 
     @similarity = {}
   end
@@ -125,16 +127,25 @@ class PerseusMatch
     tokens2 = target_tokens.inclexcl(options)
 
     if options[:sort]
-      tokens1.sort!
-      tokens2.sort!
+      tokens1 = tokens1.sort
+      tokens2 = tokens2.sort
     end
 
     if options[:soundex]
-      tokens1.soundex!
-      tokens2.soundex!
+      tokens1 = tokens1.soundex
+      tokens2 = tokens2.soundex
     end
 
-    tokens1.distance(tokens2)
+    distance = tokens1.distance(tokens2)
+
+    warn <<-EOT if verbose
+#{options.inspect}:
+  #{tokens1.inspect}
+  #{tokens2.inspect}
+=> #{distance}
+    EOT
+
+    distance
   end
 
   def total_weight
