@@ -16,15 +16,16 @@ USAGE = "Usage: #{$0} [-h|--help] [options] <file>"
 abort USAGE if ARGV.empty?
 
 options = {
-  :config      => nil,
-  :threshold   => 0,
-  :sort        => false,
-  :stats       => false,
-  :lingo       => false,
-  :minimal     => false,
-  :check       => false,
-  :failed_only => false,
-  :align       => false
+  :config       => nil,
+  :threshold    => 0,
+  :sort         => false,
+  :stats        => false,
+  :lingo        => false,
+  :minimal      => false,
+  :check        => false,
+  :failed_only  => false,
+  :align        => false,
+  :adjust_coeff => false
 }
 
 OptionParser.new { |opts|
@@ -83,6 +84,10 @@ OptionParser.new { |opts|
     options[:align] = true
   }
 
+  opts.on('-A', '--adjust-coeff', 'Adjust coefficient to minimize the error') {
+    options[:adjust_coeff] = true
+  }
+
   opts.separator ' '
   opts.separator 'Generic options:'
 
@@ -139,9 +144,13 @@ action = if options[:check]
   global_threshold = options[:threshold]
   failed_only      = options[:failed_only]
   collect_stats    = options[:stats]
+  adjust_coeff     = options[:adjust_coeff]
 
-  lambda {
-    positives = false_positives = false_negatives = 0.0
+  _action = lambda { |*args|
+    pm_options[:default_coeff] = args.first unless args.empty?
+
+    count, count_all = 0, 0
+    positives = negatives = false_positives = false_negatives = 0.0
 
     phrases.each { |line, spec|
       phrase, target, threshold, operator, _ = *spec
@@ -154,28 +163,81 @@ action = if options[:check]
         PerseusMatch.check!(phrase, target, threshold.to_f, operator, pm_options)
 
         count += 1
-        positives += 1 if assign
+        assign ? positives += 1 : negatives += 1
 
-        puts format[line, 'OK'] unless failed_only
+        puts format[line, 'OK'] unless adjust_coeff || failed_only
       rescue PerseusMatch::CheckFailedError => err
         assign ? false_negatives += 1 : false_positives += 1
 
-        puts format[line, "FAILED -- #{err.value}"]
+        puts format[line, "FAILED -- #{err.value}"] unless adjust_coeff
       end
       count_all += 1
     }
 
+    divide = lambda { |numerator, denominator|
+      denominator == 0 ? 0 : numerator / denominator
+    }
+
+    if collect_stats || adjust_coeff
+      error = divide[
+        false_positives + false_negatives,
+        positives + negatives + false_positives + false_negatives
+      ]
+    end
+
     if collect_stats
-      recall    = positives / (positives + false_negatives)
-      precision = positives / (positives + false_positives)
-      f1        = 2 * recall * precision / (recall + precision)
-      error     = (false_positives + false_negatives) / count_all
+      recall    = divide[positives, positives + false_negatives]
+      precision = divide[positives, positives + false_positives]
+      f1        = divide[2 * recall * precision, recall + precision]
 
       warn 'R = %0.2f%%, P = %0.2f%%, F1 = %0.4f, Err = %0.4f' % [
         recall * 100, precision * 100, f1, error
       ]
     end
+
+    error if adjust_coeff
   }
+
+  if adjust_coeff
+    lambda {
+      step, max = 1, 100
+
+      start_coeff = pm_options[:default_coeff] || PerseusMatch::DEFAULT_COEFF
+      start_err   = _action[start_coeff]
+
+      previous_coeff = next_coeff = start_coeff
+      previous_err   = next_err   = start_err
+
+      max.times { break if (previous_err = _action[previous_coeff -= step]) != start_err }
+      max.times { break if (next_err     = _action[next_coeff     += step]) != start_err }
+
+      best_err = [start_err, previous_err, next_err].min
+
+      if best_err == start_err
+        best_coeff = start_coeff
+      else
+        if best_err == previous_err
+          max.times {
+            break if (current_err = _action[current_coeff = previous_coeff - step]) > previous_err
+            previous_err, previous_coeff = current_err, current_coeff
+          }
+
+          best_err, best_coeff = previous_err, previous_coeff
+        else
+          max.times {
+            break if (current_err = _action[current_coeff = next_coeff + step]) > next_err
+            next_err, next_coeff = current_err, current_coeff
+          }
+
+          best_err, best_coeff = next_err, next_coeff
+        end
+      end
+
+      puts 'Coeff = %d, Err = %0.4f' % [best_coeff, best_err]
+    }
+  else
+    _action
+  end
 else
   format =
     options[:lingo] ? lambda { |pm| "#{pm.phrase}*#{pm.target}" } :
