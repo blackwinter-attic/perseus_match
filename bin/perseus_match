@@ -138,23 +138,43 @@ action = if options[:check]
 
   global_threshold = options[:threshold]
   failed_only      = options[:failed_only]
+  collect_stats    = options[:stats]
 
   lambda {
+    positives = false_positives = false_negatives = 0.0
+
     phrases.each { |line, spec|
       phrase, target, threshold, operator, _ = *spec
 
       threshold ||= global_threshold
-      operator  ||= :>
+      operator  ||= '>'
+      assign      = operator =~ />/
 
       begin
         PerseusMatch.check!(phrase, target, threshold.to_f, operator, pm_options)
+
         count += 1
+        positives += 1 if assign
+
         puts format[line, 'OK'] unless failed_only
       rescue PerseusMatch::CheckFailedError => err
+        assign ? false_negatives += 1 : false_positives += 1
+
         puts format[line, "FAILED -- #{err.value}"]
       end
       count_all += 1
     }
+
+    if collect_stats
+      recall    = positives / (positives + false_negatives)
+      precision = positives / (positives + false_positives)
+      f1        = 2 * recall * precision / (recall + precision)
+      error     = (false_positives + false_negatives) / count_all
+
+      warn 'R = %0.2f%%, P = %0.2f%%, F1 = %0.4f, Err = %0.4f' % [
+        recall * 100, precision * 100, f1, error
+      ]
+    end
   }
 else
   format =
