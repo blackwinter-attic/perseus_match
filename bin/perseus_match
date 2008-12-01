@@ -22,6 +22,7 @@ options = {
   :stats        => false,
   :lingo        => false,
   :minimal      => false,
+  :separate     => false,
   :check        => false,
   :failed_only  => false,
   :align        => false,
@@ -62,6 +63,10 @@ OptionParser.new { |opts|
 
   opts.on('-m', '--minimal', 'Produce minimal pairs only') {
     options[:minimal] = true
+  }
+
+  opts.on('-p', '--separate [SEPARATOR]', 'Separate phrase blocks by SEPARATOR', '[Default: empty line]') { |p|
+    options[:separate] = p || ''
   }
 
   opts.on('-l', '--lingo', 'Output results in lingo dictionary format') {
@@ -259,11 +264,19 @@ else
     }
   else
     lambda {
+      separator, previous_phrase = options[:separate], nil
+
       PerseusMatch::List.pair(phrases, pm_options, list_options) { |pm|
+        if separator && pm.phrase != previous_phrase ||= pm.phrase
+          puts separator
+          previous_phrase = pm.phrase
+        end
+
         if pm.similarity >= threshold
           puts format[pm]
           count += 1
         end
+
         count_all += 1
       }
     }
