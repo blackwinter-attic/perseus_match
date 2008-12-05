@@ -34,7 +34,7 @@ require 'yaml'
 
 require 'rubygems'
 require 'backports/tempfile'
-require 'nuggets/tempfile'
+require 'nuggets/tempfile/open'
 require 'nuggets/util/i18n'
 
 begin

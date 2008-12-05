@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'nuggets/tempfile'
+require 'nuggets/tempfile/open'
 require 'nuggets/util/i18n'
 
 describe PerseusMatch do
