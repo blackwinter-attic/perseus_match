@@ -13,7 +13,7 @@ begin
       :version      => PerseusMatch::VERSION,
       :summary      => %q{Fuzzy string matching based on linguistic analysis},
       :files        => FileList['lib/**/*.rb', 'bin/*'].to_a,
-      :extra_files  => FileList['[A-Z]*'].to_a,
+      :extra_files  => FileList['[A-Z]*', 'spec/**/*.rb'].to_a,
       :dependencies => ['ruby-backports', ['ruby-nuggets', '>= 0.4.0']]
     }
   }}

@@ -12,8 +12,10 @@ Fuzzy string matching based on linguistic analysis.
 
 == LINKS
 
-* <http://prometheus.rubyforge.org/perseus_match>
-* <http://github.com/blackwinter/perseus_match>
+<b></b>
+Documentation::     <http://prometheus.rubyforge.org/perseus_match>
+Source code::       <http://github.com/blackwinter/perseus_match>
+Rubyforge project:: <http://rubyforge.org/projects/prometheus>
 
 
 == AUTHORS
