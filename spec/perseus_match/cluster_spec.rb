@@ -9,8 +9,9 @@ describe PerseusMatch::Cluster do
 
   it 'should accept threshold option in sort_by (1a)' do
     PerseusMatch::Cluster.new(%w[foo bar]).sort_by(:similarity, :threshold => 0.1).all? { |phrase, matches|
-      matches.size.should be_zero
+      matches.size.should == 1
       matches.size.should == matches.nitems
+      matches.each { |match| match.target.should == phrase }
     }
   end
 

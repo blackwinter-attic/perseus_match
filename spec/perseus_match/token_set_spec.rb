@@ -4,6 +4,14 @@ describe PerseusMatch::TokenSet, ' with lingo' do
     PerseusMatch::TokenSet.instance_variable_set(:@tokens, nil)
   end
 
+  before :all do
+    @original_tokens = PerseusMatch::TokenSet.instance_variable_get(:@tokens)
+  end
+
+  after :all do
+    PerseusMatch::TokenSet.instance_variable_set(:@tokens, @original_tokens)
+  end
+
   it 'should tokenize a string' do
     PerseusMatch::TokenSet.tokenize('foo bar').should be_an_instance_of(PerseusMatch::TokenSet)
   end
@@ -34,6 +42,14 @@ describe PerseusMatch::TokenSet, ' without lingo' do
 
   before :each do
     PerseusMatch::TokenSet.instance_variable_set(:@tokens, nil)
+  end
+
+  before :all do
+    @original_tokens = PerseusMatch::TokenSet.instance_variable_get(:@tokens)
+  end
+
+  after :all do
+    PerseusMatch::TokenSet.instance_variable_set(:@tokens, @original_tokens)
   end
 
   it 'should take a prepared file for tokenization' do
