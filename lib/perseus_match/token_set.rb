@@ -78,7 +78,7 @@ class PerseusMatch
 
   class TokenSet < Array
 
-    def self.tokenize(form)
+    def self.tokenize(form, verbose = false)
       return @tokens[form] if @tokens
 
       @_tokens, @tokens = {}, Hash.new { |h, k| h[k] = new(
@@ -95,7 +95,7 @@ class PerseusMatch
               a, b = $1, $1.dup
               @_tokens[a.sub!(/[\/|].*/, '')] ||= [b.replace_diacritics.downcase]
 
-              warn "UNK: #{a} [#{res.strip}]" if b =~ /\|\?\z/
+              warn "UNK: #{a} [#{res.strip}]" if verbose && b =~ /\|\?\z/
           end
         }
       }

@@ -20,9 +20,10 @@ options = {
   :threshold    => 0,
   :sort         => false,
   :stats        => false,
-  :lingo        => false,
+  :silent       => false,
   :minimal      => false,
   :separate     => false,
+  :lingo        => false,
   :check        => false,
   :failed_only  => false,
   :align        => false,
@@ -55,6 +56,10 @@ OptionParser.new { |opts|
 
   opts.on('-v', '--verbose', 'Print additional information during processing') {
     options[:verbose] = true
+  }
+
+  opts.on('-n', '--silent', 'Suppress warnings') {
+    options[:silent] = true
   }
 
   opts.separator ' '
@@ -111,14 +116,14 @@ else
   abort "Input file not found: #{file}" unless File.readable?(file)
 end
 
-PerseusMatch::TokenSet.tokenize(file)
+PerseusMatch::TokenSet.tokenize(file, !options[:silent])
 
 skip_re = %r{\A\s*(?:#|\z)}o
 phrases = []
 
-File.open(file).each { |line|
-  phrases << line.chomp unless line =~ skip_re
-}.close
+File.open(file) { |f|
+  f.each { |line| phrases << line.chomp unless line =~ skip_re }
+}
 
 pm_options = options[:config] ? YAML.load_file(options[:config]) : {}
 pm_options[:verbose] = options[:verbose] if options.has_key?(:verbose)
@@ -144,7 +149,6 @@ action = if options[:check]
   end
 
   phrases.sort! if options[:sort]
-  phrases.map! { |line| [line, FasterCSV.parse_line(line)] }
 
   global_threshold = options[:threshold]
   failed_only      = options[:failed_only]
@@ -157,8 +161,8 @@ action = if options[:check]
     count, count_all = 0, 0
     positives = negatives = false_positives = false_negatives = 0.0
 
-    phrases.each { |line, spec|
-      phrase, target, threshold, operator, _ = *spec
+    phrases.each { |line|
+      phrase, target, threshold, operator, _ = *FasterCSV.parse_line(line)
 
       threshold ||= global_threshold
       operator  ||= '>'
@@ -176,6 +180,7 @@ action = if options[:check]
 
         puts format[line, "FAILED -- #{err.value}"] unless adjust_coeff
       end
+
       count_all += 1
     }
 
@@ -222,23 +227,19 @@ action = if options[:check]
         best_coeff = start_coeff
       else
         if best_err == previous_err
-          max.times {
-            break if (current_err = _action[current_coeff = previous_coeff - step]) > previous_err
-            previous_err, previous_coeff = current_err, current_coeff
-          }
-
-          best_err, best_coeff = previous_err, previous_coeff
+          step *= -1
+          best_coeff = previous_coeff
         else
-          max.times {
-            break if (current_err = _action[current_coeff = next_coeff + step]) > next_err
-            next_err, next_coeff = current_err, current_coeff
-          }
-
-          best_err, best_coeff = next_err, next_coeff
+          best_coeff = next_coeff
         end
+
+        max.times {
+          break if (current_err = _action[current_coeff = best_coeff + step]) > best_err
+          best_err, best_coeff = current_err, current_coeff
+        }
       end
 
-      puts 'Coeff = %d, Err = %0.4f' % [best_coeff, best_err]
+      puts 'Coeff = %d (%d), Err = %0.4f (%0.4f)' % [best_coeff, start_coeff, best_err, start_err]
     }
   else
     _action
@@ -246,38 +247,38 @@ action = if options[:check]
 else
   format =
     options[:lingo] ? lambda { |pm| "#{pm.phrase}*#{pm.target}" } :
-    options[:sort]  ? lambda { |pm| [pm.target, pm.distance, pm.similarity] } :
+    options[:sort]  ? lambda { |pm| "  #{[pm.target, pm.distance, pm.similarity].inspect}" } :
                       lambda { |pm| [pm.phrase, pm.target, pm.distance, pm.similarity].inspect }
 
   if options[:sort]
-    require 'pp'
-
     lambda {
-      pp PerseusMatch::Cluster.new(phrases, pm_options, list_options).sort { |pm|
-        if pm.similarity >= threshold
-          res = format[pm]
-          count += 1
-        end
+      PerseusMatch::Cluster.new(phrases, pm_options, list_options).sort { |pm|
         count_all += 1
-        res
-      }.map { |i| i.map { |j| j.is_a?(Array) ? j.compact : j } }
+
+        if pm.similarity >= threshold
+          count += 1
+          format[pm]
+        end
+      }.each { |phrase, matches|
+        puts "#{phrase.inspect}:", matches.compact
+      }
     }
   else
     lambda {
       separator, previous_phrase = options[:separate], nil
 
       PerseusMatch::List.pair(phrases, pm_options, list_options) { |pm|
+        count_all += 1
+
         if separator && pm.phrase != previous_phrase ||= pm.phrase
           puts separator
           previous_phrase = pm.phrase
         end
 
         if pm.similarity >= threshold
-          puts format[pm]
           count += 1
+          puts format[pm]
         end
-
-        count_all += 1
       }
     }
   end
