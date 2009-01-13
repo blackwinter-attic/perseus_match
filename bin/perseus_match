@@ -216,9 +216,13 @@ action = if options[:check]
       precision = divide[positives, positives + false_positives]
       f1        = divide[2 * recall * precision, recall + precision]
 
-      warn 'R = %0.2f%%, P = %0.2f%%, F1 = %0.4f, Err = %0.4f' % [
+      stats = 'R = %0.2f%%, P = %0.2f%%, F1 = %0.4f, Err = %0.4f' % [
         recall * 100, precision * 100, f1, error
       ]
+
+      stats << " (Coeff = #{pm_options[:default_coeff]})" if adjust_coeff
+
+      warn stats
     end
 
     error if adjust_coeff
