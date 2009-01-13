@@ -3,6 +3,7 @@
 require 'optparse'
 require 'benchmark'
 require 'yaml'
+require 'set'
 
 require 'rubygems'
 require 'nuggets/enumerable/minmax'
@@ -21,6 +22,7 @@ options = {
   :sort         => false,
   :stats        => false,
   :silent       => false,
+  :unknowns     => nil,
   :minimal      => false,
   :separate     => false,
   :lingo        => false,
@@ -60,6 +62,10 @@ OptionParser.new { |opts|
 
   opts.on('-n', '--silent', 'Suppress warnings') {
     options[:silent] = true
+  }
+
+  opts.on('-u', '--unknowns FILE', 'Write unknown tokens as lingo dictionary to FILE') { |f|
+    options[:unknowns] = f
   }
 
   opts.separator ' '
@@ -116,7 +122,17 @@ else
   abort "Input file not found: #{file}" unless File.readable?(file)
 end
 
-PerseusMatch::TokenSet.tokenize(file, !options[:silent])
+unknowns = Set.new if options[:unknowns]
+
+PerseusMatch::TokenSet.tokenize(file, unknowns || !options[:silent])
+
+if unknowns
+  File.open(options[:unknowns], 'w') { |f|
+    unknowns.sort.each { |unk| f.puts "#{unk}=#{unk} #?" }
+  }
+
+  unknowns = nil
+end
 
 skip_re = %r{\A\s*(?:#|\z)}o
 phrases = []
