@@ -182,7 +182,7 @@ action = if options[:check]
 
       threshold ||= global_threshold
       operator  ||= '>'
-      assign      = operator =~ />/
+      assign      = operator =~ />/ || operator == '=='
 
       begin
         PerseusMatch.check!(phrase, target, threshold.to_f, operator, pm_options)
