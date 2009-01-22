@@ -26,7 +26,7 @@
 ###############################################################################
 #++
 
-$KCODE = 'u'
+$KCODE = 'u' unless RUBY_VERSION >= '1.9'
 
 require 'pathname'
 require 'rbconfig'
@@ -86,7 +86,7 @@ class PerseusMatch
       )}
 
       parse = lambda { |x|
-        x.each { |res|
+        x.each_line { |res|
           case res
             when /<(.*?)\s=\s\[(.*)\]>/
               a, b = $1, $2

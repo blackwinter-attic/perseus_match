@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'rubygems'
 require 'nuggets/tempfile/open'
 require 'nuggets/util/i18n'
