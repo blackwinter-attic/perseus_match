@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{perseus_match}
-  s.version = "0.0.4"
+  s.version = "0.0.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jens Wille"]
-  s.date = %q{2009-01-13}
+  s.date = %q{2009-01-23}
   s.default_executable = %q{perseus_match}
   s.description = %q{Fuzzy string matching based on linguistic analysis}
   s.email = %q{jens.wille@uni-koeln.de}
