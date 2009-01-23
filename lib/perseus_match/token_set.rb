@@ -130,10 +130,12 @@ class PerseusMatch
           file = temp.path
         end
 
+        ruby = Config::CONFIG.values_at('RUBY_INSTALL_NAME', 'EXEEXT').join
+
         begin
-          Dir.chdir(LINGO_BASE) { parse[%x{
-            #{Config::CONFIG['ruby_install_name']} lingo.rb -c "#{cfg.path}" < "#{file}"
-          }] }
+          Dir.chdir(LINGO_BASE) {
+            parse[%x{#{ruby} lingo.rb -c "#{cfg.path}" < "#{file}"}]
+          }
         ensure
           cfg.unlink
           temp.unlink if temp
