@@ -8,6 +8,7 @@ require 'set'
 require 'rubygems'
 require 'nuggets/enumerable/minmax'
 require 'nuggets/numeric/duration'
+require 'nuggets/string/evaluate'
 
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
 
@@ -26,6 +27,7 @@ options = {
   :minimal      => false,
   :separate     => false,
   :lingo        => false,
+  :format       => nil,
   :check        => false,
   :failed_only  => false,
   :align        => false,
@@ -82,6 +84,10 @@ OptionParser.new { |opts|
 
   opts.on('-l', '--lingo', 'Output results in lingo dictionary format') {
     options[:lingo] = true
+  }
+
+  opts.on('-F', '--format FORMAT', 'Custom output format. Available placeholders:', '  %p = phrase', '  %P = phrase, CSV-ready', '  %t = target', '  %T = target, CSV-ready', '  %d = distance', '  %s = similarity') { |f|
+    options[:format] = f
   }
 
   opts.separator ' '
@@ -265,17 +271,35 @@ action = if options[:check]
     _action
   end
 else
-  format = if options[:lingo]
-    if options[:minimal]
-      lambda { |pm| ["#{pm.phrase}*#{pm.target}", "#{pm.target}*#{pm.phrase}"] }
-    else
-      lambda { |pm| "#{pm.phrase}*#{pm.target}" }
-    end
+  format = if _format = options[:format]
+    substitutions = {
+      'p' => ['#{pm.phrase}',                     's'],
+      'P' => ['"#{pm.phrase.gsub(/"/, %q{""})}"', 's'],
+      't' => ['#{pm.target}',                     's'],
+      'T' => ['"#{pm.target.gsub(/"/, %q{""})}"', 's'],
+      'd' => ['#{pm.distance}',                   'd'],
+      's' => ['#{pm.similarity}',                 'f']
+    }
+
+    lambda { |pm|
+      _format.gsub(/(%-?[.\d]*)([pPtTds])/) {
+        value, field = substitutions[$2]
+        "#{$1}#{field}" % value.evaluate(binding)
+      }
+    }
   else
-    if options[:sort]
-      lambda { |pm| "  #{[pm.target, pm.distance, pm.similarity].inspect}" }
+    if options[:lingo]
+      if options[:minimal]
+        lambda { |pm| ["#{pm.phrase}*#{pm.target}", "#{pm.target}*#{pm.phrase}"] }
+      else
+        lambda { |pm| "#{pm.phrase}*#{pm.target}" }
+      end
     else
-      lambda { |pm| [pm.phrase, pm.target, pm.distance, pm.similarity].inspect }
+      if options[:sort]
+        lambda { |pm| "  #{[pm.target, pm.distance, pm.similarity].inspect}" }
+      else
+        lambda { |pm| [pm.phrase, pm.target, pm.distance, pm.similarity].inspect }
+      end
     end
   end
 
