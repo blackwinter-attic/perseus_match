@@ -81,9 +81,13 @@ class PerseusMatch
     def self.tokenize(form, unknowns = false)
       return @tokens[form] if @tokens
 
-      @_tokens, @tokens = {}, Hash.new { |h, k| h[k] = new(
-        k, (@_tokens[k] || []) | k.scan(/\w+/).map { |i| @_tokens[i] }.flatten.compact
-      )}
+      @_tokens, @tokens = {}, Hash.new { |h, k|
+        h[k] = new(
+          k, (@_tokens[k] || []) | (
+            k.scan(/\w+/) + k.scan(/[\w-]+/)
+          ).map { |i| @_tokens[i] }.flatten.compact
+        )
+      }
 
       parse = lambda { |x|
         x.each_line { |res|
