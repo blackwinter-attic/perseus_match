@@ -79,7 +79,7 @@ class PerseusMatch
   class TokenSet < Array
 
     def self.tokenize(form, unknowns = false)
-      return @tokens[form] if @tokens
+      return @tokens[form] if @tokens ||= nil
 
       @_tokens, @tokens = {}, Hash.new { |h, k|
         h[k] = new(
@@ -114,8 +114,8 @@ class PerseusMatch
         }
       }
 
-      if File.readable?(t = 'perseus.tokens')
-        File.open(t) { |f| parse[f] }
+      if File.readable?(tokens = 'perseus.tokens')
+        File.open(tokens) { |f| parse[f] }
         @tokens[form]
       else
         raise "lingo installation not found at #{LINGO_BASE}" unless LINGO_FOUND

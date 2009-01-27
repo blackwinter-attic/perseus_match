@@ -154,7 +154,12 @@ list_options = { :minimal => options[:minimal] }
 threshold, count, count_all = options[:threshold], 0, 0
 
 action = if options[:check]
-  require 'fastercsv'
+  require 'csv'
+
+  if CSV.const_defined?(:Reader)
+    require 'fastercsv'
+    CSV = FasterCSV
+  end
 
   format = if options[:align]
     require 'jcode'
@@ -184,7 +189,7 @@ action = if options[:check]
     positives = negatives = false_positives = false_negatives = 0.0
 
     phrases.each { |line|
-      phrase, target, threshold, operator, _ = *FasterCSV.parse_line(line)
+      phrase, target, threshold, operator, _ = *CSV.parse_line(line)
 
       threshold ||= global_threshold
       operator  ||= '>'
