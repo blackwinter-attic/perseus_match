@@ -114,8 +114,10 @@ class PerseusMatch
         }
       }
 
-      if File.readable?(tokens = 'perseus.tokens')
-        File.open(tokens) { |f| parse[f] }
+      tokens_file = ENV['TOKENS_FILE'] || 'perseus.tokens'
+
+      if File.readable?(tokens_file)
+        File.open(tokens_file) { |f| parse[f] }
         @tokens[form]
       else
         raise "lingo installation not found at #{LINGO_BASE}" unless LINGO_FOUND
@@ -136,9 +138,15 @@ class PerseusMatch
 
         ruby = Config::CONFIG.values_at('RUBY_INSTALL_NAME', 'EXEEXT').join
 
+        if keep = ENV['KEEP']
+          keep = File.expand_path(keep =~ /\A(?:1|y(?:es)?|true)\z/i ? tokens_file : keep)
+        end
+
         begin
           Dir.chdir(LINGO_BASE) {
-            parse[%x{#{ruby} lingo.rb -c "#{cfg.path}" < "#{file}"}]
+            tokens = %x{#{ruby} lingo.rb -c "#{cfg.path}" < "#{file}"}
+            File.open(keep, 'w') { |f| f.puts tokens } if keep
+            parse[tokens]
           }
         ensure
           cfg.unlink
