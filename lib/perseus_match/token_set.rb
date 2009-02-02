@@ -114,7 +114,7 @@ class PerseusMatch
         }
       }
 
-      tokens_file = ENV['TOKENS_FILE'] || 'perseus.tokens'
+      tokens_file = ENV['PM_TOKENS_FILE'] || 'perseus.tokens'
 
       if File.readable?(tokens_file)
         File.open(tokens_file) { |f| parse[f] }
@@ -138,7 +138,7 @@ class PerseusMatch
 
         ruby = Config::CONFIG.values_at('RUBY_INSTALL_NAME', 'EXEEXT').join
 
-        if keep = ENV['KEEP']
+        if keep = ENV['PM_KEEP_TOKENS']
           keep = File.expand_path(keep =~ /\A(?:1|y(?:es)?|true)\z/i ? tokens_file : keep)
         end
 
@@ -173,6 +173,7 @@ class PerseusMatch
       @tokens = to_a.flatten
     end
 
+    # (size1 - size2).abs <= distance <= [size1, size2].max
     def distance(other)
       tokens1, tokens2 = tokens, other.tokens
       size1, size2 = tokens1.size, tokens2.size
