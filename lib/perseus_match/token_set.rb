@@ -47,8 +47,20 @@ LINGO_BASE = ENV['PM_LINGO_BASE'] || (
   File.readable?('LINGO_BASE') ? File.read('LINGO_BASE').chomp : '.'
 )
 
-LINGO_FOUND = File.readable?(File.join(LINGO_BASE, 'lingo.rb'))
-warn "lingo installation not found at #{LINGO_BASE} -- proceeding anyway" unless LINGO_FOUND
+if LINGO_FOUND = File.readable?(File.join(LINGO_BASE, 'lingo.rb'))
+  begin
+    require File.join(LINGO_BASE, 'lib', 'const')
+  rescue LoadError
+  end
+else
+  warn "lingo installation not found at #{LINGO_BASE} -- proceeding anyway"
+end
+
+unless Object.const_defined?(:PRINTABLE_CHAR)
+  PRINTABLE_CHAR = '[\w-]'
+end
+
+PRINTABLE_CHAR_RE = %r{(?:#{PRINTABLE_CHAR})+}
 
 lingo_config = if File.readable?(file = ENV['PM_LINGO_CONFIG'] || 'lingo.cfg')
   YAML.load_file(file)
@@ -82,11 +94,10 @@ class PerseusMatch
       return @tokens[form] if @tokens ||= nil
 
       @_tokens, @tokens = {}, Hash.new { |h, k|
-        h[k] = new(
-          k, (@_tokens[k] || []) | (
-            k.scan(/\w+/) + k.scan(/[\w-]+/)
-          ).map { |i| @_tokens[i] }.flatten.compact
-        )
+        _tokens = @_tokens[k] || []
+        _tokens |= k.scan(PRINTABLE_CHAR_RE).map { |i| @_tokens[i] }.flatten.compact
+
+        h[k] = new(k, _tokens)
       }
 
       parse = lambda { |x|
