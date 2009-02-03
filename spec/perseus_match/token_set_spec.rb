@@ -65,11 +65,12 @@ describe PerseusMatch::TokenSet, ' without lingo' do
     link = 'perseus.tokens'
 
     Dir.chdir(File.dirname(path)) {
-      File.symlink(path, link)
-
-      PerseusMatch::TokenSet.tokenize('foo bar').should be_an_instance_of(PerseusMatch::TokenSet)
-
-      File.unlink(link)
+      begin
+        File.symlink(path, link)
+        PerseusMatch::TokenSet.tokenize('foo bar').should be_an_instance_of(PerseusMatch::TokenSet)
+      ensure
+        File.unlink(link) if File.symlink?(link) && File.readlink(link) == path
+      end
     }
 
     temp.unlink
