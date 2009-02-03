@@ -94,10 +94,9 @@ class PerseusMatch
       return @tokens[form] if @tokens ||= nil
 
       @_tokens, @tokens = {}, Hash.new { |h, k|
-        _tokens = @_tokens[k] || []
-        _tokens |= k.scan(PRINTABLE_CHAR_RE).map { |i| @_tokens[i] }.flatten.compact
-
-        h[k] = new(k, _tokens)
+        h[k] = new(k, @_tokens[k] || k.scan(PRINTABLE_CHAR_RE).map { |i|
+          new(i, @_tokens[i] || [])
+        })
       }
 
       parse = lambda { |x|
@@ -181,7 +180,7 @@ class PerseusMatch
       super(tokens || self.class.tokenize(form))
 
       @form   = form
-      @tokens = to_a.flatten
+      @tokens = to_a
     end
 
     # (size1 - size2).abs <= distance <= [size1, size2].max
@@ -218,8 +217,11 @@ class PerseusMatch
     end
 
     def tokens(wc = true)
-      wc ? @tokens : @tokens_sans_wc ||= @tokens.map { |token|
-        token.sub(%r{[/|].*?\z}, '')
+      wc ? @tokens : @tokens_sans_wc ||= @tokens.map { |tokens|
+        tokens.is_a?(self.class) ? tokens.map { |token|
+          token.sub(%r{[/|].*?\z}, '')
+        }.to_token_set(tokens.form) :
+          tokens.sub(%r{[/|].*?\z}, '')
       }
     end
 
@@ -232,22 +234,26 @@ class PerseusMatch
     end
 
     def incl(*wc)
-      (@incl ||= {})[wc = [*wc].compact] ||= select { |token|
-        match?(token, wc)
+      (@incl ||= {})[wc = [*wc].compact] ||= map { |tokens|
+        tokens.select { |token| match?(token, wc) }.to_token_set(tokens.form)
       }.to_token_set(form)
     end
 
     def excl(*wc)
-      (@excl ||= {})[wc = [*wc].compact] ||= reject { |token|
-        match?(token, wc)
+      (@excl ||= {})[wc = [*wc].compact] ||= map { |tokens|
+        tokens.reject { |token| match?(token, wc) }.to_token_set(tokens.form)
       }.to_token_set(form)
     end
 
     def soundex
       raise "soundex functionality not available" unless defined?(Text::Soundex)
 
-      @soundex ||= map { |token|
-        token.sub(/(.*)(?=[\/|])/) { |m| Text::Soundex.soundex(m.replace_diacritics) }
+      @soundex ||= map { |tokens|
+        tokens.map { |token|
+          token.sub(/(.*)(?=[\/|])/) { |m|
+            Text::Soundex.soundex(m.replace_diacritics.sub(/\W+/, ''))
+          }
+        }.to_token_set(tokens.form)
       }.to_token_set(form)
     end
 
@@ -255,8 +261,12 @@ class PerseusMatch
       replace soundex
     end
 
+    def ==(other)
+      tokens == other.tokens
+    end
+
     def eql?(other)
-      tokens == other.tokens && form == other.form
+      self == other && form == other.form
     end
 
     def inspect
