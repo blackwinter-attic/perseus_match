@@ -94,9 +94,7 @@ class PerseusMatch
       return @tokens[form] if @tokens ||= nil
 
       @_tokens, @tokens = {}, Hash.new { |h, k|
-        h[k] = new(k, @_tokens[k] || k.scan(PRINTABLE_CHAR_RE).map { |i|
-          new(i, @_tokens[i] || [])
-        })
+        h[k] = new(k, k.scan(PRINTABLE_CHAR_RE).map { |i| new(i, @_tokens[i] || []) })
       }
 
       parse = lambda { |x|
@@ -104,14 +102,14 @@ class PerseusMatch
           case res
             when /<(.*?)\s=\s\[(.*)\]>/
               a, b = $1, $2
-              a.sub!(/\|.*/, '')
+              a.sub!(Token::WC_RE, '')
 
-              @_tokens[a] ||= b.scan(/\((.*?)\+?\)/).flatten
+              @_tokens[a] ||= b.scan(/\((.*?)\+?\)/).flatten.map { |t| Token.new(t) }
             when /<(.*)>/, /:(.*):/
-              a, b = $1, $1.dup
-              a.sub!(/[\/|].*/, '')
+              a, b = $1, Token.new($1.replace_diacritics.downcase)
+              a.sub!(Token::WC_RE, '')
 
-              if unknowns && b =~ /\|\?\z/
+              if unknowns && b.unk?
                 if unknowns.respond_to?(:<<)
                   unknowns << a
                 else
@@ -119,7 +117,7 @@ class PerseusMatch
                 end
               end
 
-              @_tokens[a] ||= [b.replace_diacritics.downcase]
+              @_tokens[a] ||= [b]
           end
         }
       }
@@ -130,7 +128,7 @@ class PerseusMatch
         File.open(tokens_file) { |f| parse[f] }
         @tokens[form]
       else
-        raise "lingo installation not found at #{LINGO_BASE}" unless LINGO_FOUND
+        raise "Lingo installation not found at #{LINGO_BASE}" unless LINGO_FOUND
 
         cfg = Tempfile.open(['perseus_match_lingo', '.cfg']) { |t|
           YAML.dump(LINGO_CONFIG, t)
@@ -216,12 +214,9 @@ class PerseusMatch
       distance + 1  # > 0 !?!
     end
 
-    def tokens(wc = true)
-      wc ? @tokens : @tokens_sans_wc ||= @tokens.map { |tokens|
-        tokens.is_a?(self.class) ? tokens.map { |token|
-          token.sub(%r{[/|].*?\z}, '')
-        }.to_token_set(tokens.form) :
-          tokens.sub(%r{[/|].*?\z}, '')
+    def tokens(including_wc = true)
+      including_wc ? @tokens : @tokens_sans_wc ||= @tokens.map { |tokens|
+        tokens.map { |token| token.form }.to_token_set(tokens.form)
       }
     end
 
@@ -230,29 +225,28 @@ class PerseusMatch
     end
 
     def inclexcl(inclexcl = {})
-      incl(inclexcl[:incl] || '.*').excl(inclexcl[:excl])
+      incl(inclexcl[:incl] || Token::ANY_WC).excl(inclexcl[:excl])
     end
 
-    def incl(*wc)
-      (@incl ||= {})[wc = [*wc].compact] ||= map { |tokens|
-        tokens.select { |token| match?(token, wc) }.to_token_set(tokens.form)
+    def incl(wcs)
+      (@incl ||= {})[wcs = [*wcs].compact] ||= map { |tokens|
+        tokens.select { |token| token.match?(wcs) }.to_token_set(tokens.form)
       }.to_token_set(form)
     end
 
-    def excl(*wc)
-      (@excl ||= {})[wc = [*wc].compact] ||= map { |tokens|
-        tokens.reject { |token| match?(token, wc) }.to_token_set(tokens.form)
+    def excl(wcs)
+      (@excl ||= {})[wcs = [*wcs].compact] ||= map { |tokens|
+        tokens.reject { |token| token.match?(wcs) }.to_token_set(tokens.form)
       }.to_token_set(form)
     end
 
     def soundex
-      raise "soundex functionality not available" unless defined?(Text::Soundex)
+      raise "Soundex functionality not available" unless defined?(Text::Soundex)
 
       @soundex ||= map { |tokens|
         tokens.map { |token|
-          token.sub(/(.*)(?=[\/|])/) { |m|
-            Text::Soundex.soundex(m.replace_diacritics.sub(/\W+/, ''))
-          }
+          form = token.form.replace_diacritics.sub(/\W+/, '')
+          Token.new(Text::Soundex.soundex(form), token.wc)
         }.to_token_set(tokens.form)
       }.to_token_set(form)
     end
@@ -274,12 +268,6 @@ class PerseusMatch
     end
 
     alias_method :to_s, :inspect
-
-    private
-
-    def match?(token, wc)
-      token =~ %r{[/|](?:#{wc.join('|')})\z}
-    end
 
   end
 

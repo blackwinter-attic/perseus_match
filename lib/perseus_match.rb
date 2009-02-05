@@ -28,6 +28,7 @@
 
 require 'perseus_match/list'
 require 'perseus_match/cluster'
+require 'perseus_match/token'
 require 'perseus_match/token_set'
 
 require 'perseus_match/version'
