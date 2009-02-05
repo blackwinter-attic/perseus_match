@@ -158,13 +158,8 @@ describe PerseusMatch do
 
   it 'should be checkable (2)' do
     lambda {
-      begin
-        PerseusMatch.check!('foo', 'bar', 0, :>)
-      rescue PerseusMatch::CheckFailedError => err
-        err.to_s.should =~ /0/
-        raise err
-      end
-    }.should raise_error(PerseusMatch::CheckFailedError)
+      PerseusMatch.check!('foo', 'bar', 0, :>)
+    }.should raise_error(PerseusMatch::CheckFailedError, /0/)
   end
 
 end if LINGO_FOUND
