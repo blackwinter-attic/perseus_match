@@ -164,15 +164,13 @@ class PerseusMatch
         if temp
           tokens, @tokens = @tokens[form], nil
           tokens
-        else
-          @tokens[form]
         end
       end
     end
 
     private :push, :<<, :[]=  # maybe more...
 
-    attr_reader :form
+    attr_reader :form, :tokens
 
     def initialize(form, tokens = nil)
       super(tokens || self.class.tokenize(form))
@@ -214,14 +212,14 @@ class PerseusMatch
       distance + 1  # > 0 !?!
     end
 
-    def tokens(including_wc = true)
-      including_wc ? @tokens : @tokens_sans_wc ||= @tokens.map { |tokens|
-        tokens.map { |token| token.form }.to_token_set(tokens.form)
+    def forms
+      @forms ||= @tokens.map { |tokens|
+        tokens.map { |token| token.form }
       }
     end
 
     def disjoint?(other)
-      (tokens(false) & other.tokens(false)).empty?
+      (forms & other.forms).flatten.empty?
     end
 
     def inclexcl(inclexcl = {})
