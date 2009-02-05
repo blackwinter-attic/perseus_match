@@ -130,7 +130,7 @@ end
 
 unknowns = Set.new if options[:unknowns]
 
-PerseusMatch::TokenSet.tokenize(file, unknowns || !options[:silent])
+PerseusMatch.tokenize(file, unknowns || !options[:silent])
 
 if unknowns
   File.open(options[:unknowns], 'w') { |f|

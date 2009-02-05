@@ -90,21 +90,70 @@ class PerseusMatch
 
   class TokenSet < Array
 
-    def self.tokenize(form, unknowns = false)
-      return @tokens[form] if @tokens ||= nil
+    class << self
 
-      @_tokens, @tokens = {}, Hash.new { |h, k|
-        h[k] = new(k, k.scan(PRINTABLE_CHAR_RE).map { |i| new(i, @_tokens[i] || []) })
-      }
+      def tokenize(form, unknowns = false)
+        return @tokens[form] if @tokens ||= nil
 
-      parse = lambda { |x|
-        x.each_line { |res|
+        @_tokens = Hash.new
+        @tokens  = Hash.new { |h, k| h[k] = new(k, @_tokens[k] || []) }
+
+        tokens_file = ENV['PM_TOKENS_FILE'] || 'perseus.tokens'
+
+        if File.readable?(tokens_file)
+          File.open(tokens_file) { |f| parse(f, unknowns, @_tokens) }
+          @tokens[form]
+        else
+          raise "Lingo installation not found at #{LINGO_BASE}" unless LINGO_FOUND
+
+          cfg = Tempfile.open(['perseus_match_lingo', '.cfg']) { |t|
+            YAML.dump(LINGO_CONFIG, t)
+          }
+
+          file = file?(form) || begin
+            temp = Tempfile.open('perseus_match_temp') { |t| t.puts form }
+            temp.path
+          end
+
+          ruby = Config::CONFIG.values_at('RUBY_INSTALL_NAME', 'EXEEXT').join
+
+          if keep = ENV['PM_KEEP_TOKENS']
+            keep = File.expand_path(keep =~ /\A(?:1|y(?:es)?|true)\z/i ? tokens_file : keep)
+          end
+
+          begin
+            Dir.chdir(LINGO_BASE) {
+              tokens = %x{#{ruby} lingo.rb -c "#{cfg.path}" < "#{file}"}
+              File.open(keep, 'w') { |f| f.puts tokens } if keep
+              parse(tokens, unknowns, @_tokens)
+            }
+          ensure
+            cfg.unlink
+            temp.unlink if temp
+          end
+
+          if temp
+            tokens, @tokens = @tokens[form], nil
+            tokens
+          end
+        end
+      end
+
+      def file?(form)
+        file = Pathname.new(form).absolute? ? form : File.expand_path(form)
+        file if File.file?(file) && File.readable?(file)
+      end
+
+      private
+
+      def parse(output, unknowns = false, tokens = {})
+        output.each_line { |res|
           case res
             when /<(.*?)\s=\s\[(.*)\]>/
               a, b = $1, $2
               a.sub!(Token::WC_RE, '')
 
-              @_tokens[a] ||= b.scan(/\((.*?)\+?\)/).flatten.map { |t| Token.new(t) }
+              tokens[a] ||= b.scan(/\((.*?)\+?\)/).flatten.map { |t| Token.new(t) }
             when /<(.*)>/, /:(.*):/
               a, b = $1, Token.new($1.replace_diacritics.downcase)
               a.sub!(Token::WC_RE, '')
@@ -117,55 +166,13 @@ class PerseusMatch
                 end
               end
 
-              @_tokens[a] ||= [b]
+              tokens[a] ||= [b]
           end
         }
-      }
 
-      tokens_file = ENV['PM_TOKENS_FILE'] || 'perseus.tokens'
-
-      if File.readable?(tokens_file)
-        File.open(tokens_file) { |f| parse[f] }
-        @tokens[form]
-      else
-        raise "Lingo installation not found at #{LINGO_BASE}" unless LINGO_FOUND
-
-        cfg = Tempfile.open(['perseus_match_lingo', '.cfg']) { |t|
-          YAML.dump(LINGO_CONFIG, t)
-        }
-
-        file = Pathname.new(form).absolute? ? form : File.join(Dir.pwd, form)
-
-        unless File.file?(file) && File.readable?(file)
-          temp = Tempfile.open('perseus_match_temp') { |t|
-            t.puts form
-          }
-
-          file = temp.path
-        end
-
-        ruby = Config::CONFIG.values_at('RUBY_INSTALL_NAME', 'EXEEXT').join
-
-        if keep = ENV['PM_KEEP_TOKENS']
-          keep = File.expand_path(keep =~ /\A(?:1|y(?:es)?|true)\z/i ? tokens_file : keep)
-        end
-
-        begin
-          Dir.chdir(LINGO_BASE) {
-            tokens = %x{#{ruby} lingo.rb -c "#{cfg.path}" < "#{file}"}
-            File.open(keep, 'w') { |f| f.puts tokens } if keep
-            parse[tokens]
-          }
-        ensure
-          cfg.unlink
-          temp.unlink if temp
-        end
-
-        if temp
-          tokens, @tokens = @tokens[form], nil
-          tokens
-        end
+        tokens
       end
+
     end
 
     private :push, :<<, :[]=  # maybe more...
@@ -179,43 +186,12 @@ class PerseusMatch
       @tokens = to_a
     end
 
-    # (size1 - size2).abs <= distance <= [size1, size2].max
     def distance(other)
-      tokens1, tokens2 = tokens, other.tokens
-      size1, size2 = tokens1.size, tokens2.size
-
-      return size2 if tokens1.empty?
-      return size1 if tokens2.empty?
-
-      distance, costs = nil, (0..size2).to_a
-
-      0.upto(size1 - 1) { |index1|
-        token1, cost = tokens1[index1], index1 + 1
-
-        0.upto(size2 - 1) { |index2|
-          penalty = token1 == tokens2[index2] ? 0 : 1
-
-          # rcov hack :-(
-          _ = [
-            costs[index2 + 1] + 1,   # insertion
-            cost + 1,                # deletion
-            costs[index2] + penalty  # substitution
-          ]
-          distance = _.min
-
-          costs[index2], cost = cost, distance
-        }
-
-        costs[size2] = distance
-      }
-
-      distance + 1  # > 0 !?!
+      self == other ? 0 : 1  # TODO
     end
 
     def forms
-      @forms ||= @tokens.map { |tokens|
-        tokens.map { |token| token.form }
-      }
+      @forms ||= map { |token| token.form }
     end
 
     def disjoint?(other)
@@ -227,26 +203,20 @@ class PerseusMatch
     end
 
     def incl(wcs)
-      (@incl ||= {})[wcs = [*wcs].compact] ||= map { |tokens|
-        tokens.select { |token| token.match?(wcs) }.to_token_set(tokens.form)
-      }.to_token_set(form)
+      self.class.new(form, select { |token| token.match?(wcs) })
     end
 
     def excl(wcs)
-      (@excl ||= {})[wcs = [*wcs].compact] ||= map { |tokens|
-        tokens.reject { |token| token.match?(wcs) }.to_token_set(tokens.form)
-      }.to_token_set(form)
+      self.class.new(form, reject { |token| token.match?(wcs) })
     end
 
     def soundex
-      raise "Soundex functionality not available" unless defined?(Text::Soundex)
+      ensure_soundex!
 
-      @soundex ||= map { |tokens|
-        tokens.map { |token|
-          form = token.form.replace_diacritics.sub(/\W+/, '')
-          Token.new(Text::Soundex.soundex(form), token.wc)
-        }.to_token_set(tokens.form)
-      }.to_token_set(form)
+      @soundex ||= self.class.new(form, map { |token|
+        form = token.form.replace_diacritics.sub(/\W+/, '')
+        Token.new(Text::Soundex.soundex(form), token.wc)
+      })
     end
 
     def soundex!
@@ -267,12 +237,79 @@ class PerseusMatch
 
     alias_method :to_s, :inspect
 
+    private
+
+    def ensure_soundex!
+      unless defined?(Text::Soundex)
+        raise RuntimeError, "Soundex functionality not available", caller(1)
+      end
+    end
+
   end
 
-  class ::Array
+  class PhraseTokenSet < TokenSet
 
-    def to_token_set(form)
-      TokenSet.new(form, self)
+    class << self
+
+      def tokenize(form, unknowns = false)
+        (@tokens ||= {})[form] ||= new(form, form.scan(PRINTABLE_CHAR_RE).map { |i|
+          TokenSet.tokenize(i, unknowns)
+        })
+      end
+
+    end
+
+    alias_method :phrase, :form
+    alias_method :token_sets, :tokens
+
+    # (size1 - size2).abs <= distance <= [size1, size2].max
+    def distance(other)
+      token_sets1, token_sets2 = token_sets, other.token_sets
+      size1, size2 = token_sets1.size, token_sets2.size
+
+      return size2 if size1 == 0
+      return size1 if size2 == 0
+
+      distance, costs = nil, (0..size2).to_a
+
+      0.upto(size1 - 1) { |index1|
+        token_set1, cost = token_sets1[index1], index1 + 1
+
+        0.upto(size2 - 1) { |index2|
+          penalty = token_set1.distance(token_sets2[index2])
+
+          # rcov hack :-(
+          _ = [
+            costs[index2 + 1] + 1,   # insertion
+            cost + 1,                # deletion
+            costs[index2] + penalty  # substitution
+          ]
+          distance = _.min
+
+          costs[index2], cost = cost, distance
+        }
+
+        costs[size2] = distance
+      }
+
+      distance + 1  # > 0 !?!
+    end
+
+    def forms
+      @forms ||= map { |token_set| token_set.forms }
+    end
+
+    def incl(wcs)
+      self.class.new(form, map { |token_set| token_set.incl(wcs) })
+    end
+
+    def excl(wcs)
+      self.class.new(form, map { |token_set| token_set.excl(wcs) })
+    end
+
+    def soundex
+      ensure_soundex!
+      @soundex ||= self.class.new(form, map { |token_set| token_set.soundex })
     end
 
   end

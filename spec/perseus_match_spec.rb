@@ -37,7 +37,7 @@ describe PerseusMatch do
       t.puts *phrases
     }
 
-    PerseusMatch::TokenSet.tokenize(temp.path)
+    PerseusMatch.tokenize(temp.path)
 
     temp.unlink
 

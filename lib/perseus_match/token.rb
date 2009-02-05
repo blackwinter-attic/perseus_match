@@ -16,6 +16,7 @@ class PerseusMatch
     end
 
     def match?(wcs)
+      wcs = [*wcs].compact
       wcs.include?(wc) || wcs.include?(ANY_WC)
     end
 
@@ -32,7 +33,7 @@ class PerseusMatch
     end
 
     def inspect
-      "#{super}<#{wc}>"
+      "#{super}/#{wc}"
     end
 
     alias_method :to_s, :inspect

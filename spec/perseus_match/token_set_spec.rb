@@ -1,8 +1,4 @@
-describe PerseusMatch::TokenSet, ' with lingo' do
-
-  before :each do
-    PerseusMatch::TokenSet.instance_variable_set(:@tokens, nil)
-  end
+describe PerseusMatch::PhraseTokenSet, 'with lingo' do
 
   before :all do
     @original_tokens = PerseusMatch::TokenSet.instance_variable_get(:@tokens)
@@ -12,37 +8,37 @@ describe PerseusMatch::TokenSet, ' with lingo' do
     PerseusMatch::TokenSet.instance_variable_set(:@tokens, @original_tokens)
   end
 
+  before :each do
+    PerseusMatch::TokenSet.instance_variable_set(:@tokens, nil)
+  end
+
   it 'should tokenize a string' do
-    PerseusMatch::TokenSet.tokenize('foo bar').should be_an_instance_of(PerseusMatch::TokenSet)
+    PerseusMatch::PhraseTokenSet.tokenize('foo bar').should be_an_instance_of(PerseusMatch::PhraseTokenSet)
   end
 
-  it 'should report strictly equal TokenSets as ==' do
-    PerseusMatch::TokenSet.new('foo bar').should == PerseusMatch::TokenSet.new('foo bar')
+  it 'should report strictly equal PhraseTokenSets as ==' do
+    PerseusMatch::PhraseTokenSet.new('foo bar').should == PerseusMatch::PhraseTokenSet.new('foo bar')
   end
 
-  it 'should report strictly equal TokenSets as eql' do
-    PerseusMatch::TokenSet.new('foo bar').should be_eql(PerseusMatch::TokenSet.new('foo bar'))
+  it 'should report strictly equal PhraseTokenSets as eql' do
+    PerseusMatch::PhraseTokenSet.new('foo bar').should be_eql(PerseusMatch::PhraseTokenSet.new('foo bar'))
   end
 
-  it 'should report slightly equal TokenSets as ==' do
-    PerseusMatch::TokenSet.new('foo bar').should == PerseusMatch::TokenSet.new('Foo Bar')
+  it 'should report slightly equal PhraseTokenSets as ==' do
+    PerseusMatch::PhraseTokenSet.new('foo bar').should == PerseusMatch::PhraseTokenSet.new('Foo Bar')
   end
 
-  it 'should *not* report slightly equal TokenSets as eql' do
-    PerseusMatch::TokenSet.new('foo bar').should_not be_eql(PerseusMatch::TokenSet.new('Foo Bar'))
+  it 'should *not* report slightly equal PhraseTokenSets as eql' do
+    PerseusMatch::PhraseTokenSet.new('foo bar').should_not be_eql(PerseusMatch::PhraseTokenSet.new('Foo Bar'))
   end
 
   it 'should include form in inspect' do
-    PerseusMatch::TokenSet.new('foo', []).inspect.to_s.should =~ /<foo>/
+    PerseusMatch::PhraseTokenSet.new('foo', []).inspect.to_s.should =~ /<foo>/
   end
 
 end if LINGO_FOUND
 
-describe PerseusMatch::TokenSet, ' without lingo' do
-
-  before :each do
-    PerseusMatch::TokenSet.instance_variable_set(:@tokens, nil)
-  end
+describe PerseusMatch::PhraseTokenSet, 'without lingo' do
 
   before :all do
     @original_tokens = PerseusMatch::TokenSet.instance_variable_get(:@tokens)
@@ -50,6 +46,10 @@ describe PerseusMatch::TokenSet, ' without lingo' do
 
   after :all do
     PerseusMatch::TokenSet.instance_variable_set(:@tokens, @original_tokens)
+  end
+
+  before :each do
+    PerseusMatch::TokenSet.instance_variable_set(:@tokens, nil)
   end
 
   it 'should take a prepared file for tokenization' do
@@ -67,7 +67,7 @@ describe PerseusMatch::TokenSet, ' without lingo' do
     Dir.chdir(File.dirname(path)) {
       begin
         File.symlink(path, link)
-        PerseusMatch::TokenSet.tokenize('foo bar').should be_an_instance_of(PerseusMatch::TokenSet)
+        PerseusMatch::PhraseTokenSet.tokenize('foo bar').should be_an_instance_of(PerseusMatch::PhraseTokenSet)
       ensure
         File.unlink(link) if File.symlink?(link) && File.readlink(link) == path
       end

@@ -73,6 +73,14 @@ class PerseusMatch
       value.send(operator, threshold) or raise CheckFailedError.new(value, threshold, operator)
     end
 
+    def tokenize(form, unknowns = false)
+      if file = TokenSet.file?(form)
+        TokenSet.tokenize(file, unknowns)
+      else
+        PhraseTokenSet.tokenize(form, unknowns)
+      end
+    end
+
   end
 
   attr_reader :phrase, :target, :distance_spec, :default_coeff, :verbose
@@ -90,11 +98,11 @@ class PerseusMatch
   end
 
   def phrase_tokens
-    @phrase_tokens ||= tokenize(phrase)
+    @phrase_tokens ||= self.class.tokenize(phrase)
   end
 
   def target_tokens
-    @target_tokens ||= tokenize(target)
+    @target_tokens ||= self.class.tokenize(target)
   end
 
   # 0 <= distance <= Infinity
@@ -109,10 +117,6 @@ class PerseusMatch
   end
 
   private
-
-  def tokenize(str)
-    TokenSet.new(str)
-  end
 
   def calculate_distance
     return Infinity if phrase_tokens.disjoint?(target_tokens)
