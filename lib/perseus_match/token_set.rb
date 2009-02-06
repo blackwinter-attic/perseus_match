@@ -40,7 +40,7 @@ require 'nuggets/util/i18n'
 begin
   require 'text/soundex'
 rescue LoadError
-  warn "could not load the Text gem -- soundex functionality will not be available"
+  warn "Could not load the Text gem -- Soundex functionality will not be available"
 end
 
 LINGO_BASE = ENV['PM_LINGO_BASE'] || (
@@ -53,7 +53,7 @@ if LINGO_FOUND = File.readable?(File.join(LINGO_BASE, 'lingo.rb'))
   rescue LoadError
   end
 else
-  warn "lingo installation not found at #{LINGO_BASE} -- proceeding anyway"
+  warn "Lingo installation not found at #{LINGO_BASE} -- proceeding anyway"
 end
 
 unless Object.const_defined?(:PRINTABLE_CHAR)
@@ -65,7 +65,7 @@ PRINTABLE_CHAR_RE = %r{(?:#{PRINTABLE_CHAR})+}
 lingo_config = if File.readable?(file = ENV['PM_LINGO_CONFIG'] || 'lingo.cfg')
   YAML.load_file(file)
 else
-  warn "lingo config not found at #{ENV['PM_LINGO_CONFIG']} -- using default" if ENV.has_key?('PM_LINGO_CONFIG')
+  warn "Lingo config not found at #{ENV['PM_LINGO_CONFIG']} -- using default" if ENV.has_key?('PM_LINGO_CONFIG')
 
   {
     'meeting' => {
@@ -217,10 +217,6 @@ class PerseusMatch
         form = token.form.replace_diacritics.sub(/\W+/, '')
         Token.new(Text::Soundex.soundex(form), token.wc)
       })
-    end
-
-    def soundex!
-      replace soundex
     end
 
     def ==(other)
