@@ -215,7 +215,7 @@ class PerseusMatch
 
       @soundex ||= self.class.new(form, map { |token|
         form = token.form.replace_diacritics.sub(/\W+/, '')
-        Token.new(Text::Soundex.soundex(form), token.wc)
+        Token.new(Text::Soundex.soundex(form) || '', token.wc)
       })
     end
 
