@@ -93,6 +93,7 @@ class PerseusMatch
     class << self
 
       def tokenize(form, unknowns = false)
+        form.downcase!
         return @tokens[form] if @tokens ||= nil
 
         @_tokens = Hash.new
@@ -147,16 +148,21 @@ class PerseusMatch
       private
 
       def parse(output, unknowns = false, tokens = {})
+        sanitize = lambda { |a|
+          a.sub!(Token::WC_RE, '')
+          a.downcase!
+        }
+
         output.each_line { |res|
           case res
             when /<(.*?)\s=\s\[(.*)\]>/
               a, b = $1, $2
-              a.sub!(Token::WC_RE, '')
+              sanitize[a]
 
               tokens[a] ||= b.scan(/\((.*?)\+?\)/).flatten.map { |t| Token.new(t) }
             when /<(.*)>/, /:(.*):/
-              a, b = $1, Token.new($1.replace_diacritics.downcase)
-              a.sub!(Token::WC_RE, '')
+              a, b = $1, Token.new($1.downcase)
+              sanitize[a]
 
               if unknowns && b.unk?
                 if unknowns.respond_to?(:<<)
@@ -187,7 +193,7 @@ class PerseusMatch
     end
 
     def distance(other)
-      self == other ? 0 : 1  # TODO
+      (forms | other.forms).size - (forms & other.forms).size
     end
 
     def forms
@@ -195,7 +201,7 @@ class PerseusMatch
     end
 
     def disjoint?(other)
-      (forms & other.forms).flatten.empty?
+      (forms.flatten & other.forms.flatten).flatten.empty?
     end
 
     def inclexcl(inclexcl = {})
@@ -288,7 +294,7 @@ class PerseusMatch
         costs[size2] = distance
       }
 
-      distance + 1  # > 0 !?!
+      distance
     end
 
     def forms

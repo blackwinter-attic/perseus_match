@@ -196,16 +196,16 @@ action = if options[:check]
       assign      = operator =~ />/ || operator == '=='
 
       begin
-        PerseusMatch.check!(phrase, target, threshold.to_f, operator, pm_options)
+        res = PerseusMatch.check!(phrase, target, threshold.to_f, operator, pm_options)
 
         count += 1
         assign ? positives += 1 : negatives += 1
 
-        puts format[line, 'OK'] unless adjust_coeff || failed_only
+        puts format[line, "OK -- #{res.value} (#{res.pm.distance})"] unless adjust_coeff || failed_only
       rescue PerseusMatch::CheckFailedError => err
         assign ? false_negatives += 1 : false_positives += 1
 
-        puts format[line, "FAILED -- #{err.value}"] unless adjust_coeff
+        puts format[line, "FAILED -- #{err.value} (#{err.pm.distance})"] unless adjust_coeff
       end
 
       count_all += 1
@@ -227,8 +227,17 @@ action = if options[:check]
       precision = divide[positives, positives + false_positives]
       f1        = divide[2 * recall * precision, recall + precision]
 
-      stats = 'R = %0.2f%%, P = %0.2f%%, F1 = %0.4f, Err = %0.4f' % [
-        recall * 100, precision * 100, f1, error
+      error_all = divide[  # trivial: assign all
+        negatives + false_positives,
+        positives + negatives + false_positives + false_negatives
+      ]
+      error_none = divide[  # trivial: assign none
+        positives + false_negatives,
+        positives + negatives + false_positives + false_negatives
+      ]
+
+      stats = 'R = %0.2f%%, P = %0.2f%%, F1 = %0.4f, Err = %0.4f (ALL = %0.4f, NONE = %0.4f)' % [
+        recall * 100, precision * 100, f1, error, error_all, error_none
       ]
 
       stats << " (Coeff = #{pm_options[:default_coeff]})" if adjust_coeff

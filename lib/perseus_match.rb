@@ -26,6 +26,8 @@
 ###############################################################################
 #++
 
+require 'perseus_match/core_ext'
+
 require 'perseus_match/list'
 require 'perseus_match/cluster'
 require 'perseus_match/token'
@@ -37,7 +39,7 @@ class PerseusMatch
 
   Infinity = 1.0 / 0
 
-  DEFAULT_COEFF = 20
+  DEFAULT_COEFF = 2
 
   DISTANCE_SPEC = [                # {
     [{},                      1],  #   {}                      => 1,
@@ -69,8 +71,14 @@ class PerseusMatch
     end
 
     def check!(phrase, target, threshold = 0, operator = :>, pm_options = {}, attribute = :similarity)
-      value = new(phrase, target, pm_options).send(attribute)
-      value.send(operator, threshold) or raise CheckFailedError.new(value, threshold, operator)
+      pm = new(phrase, target, pm_options)
+      value = pm.send(attribute)
+
+      if value.send(operator, threshold)
+        Struct.new(:pm, :value, :threshold, :operator).new(pm, value, threshold, operator)
+      else
+        raise CheckFailedError.new(pm, value, threshold, operator)
+      end
     end
 
     def tokenize(form, unknowns = false)
@@ -86,8 +94,8 @@ class PerseusMatch
   attr_reader :phrase, :target, :distance_spec, :default_coeff, :verbose
 
   def initialize(phrase, target, options = {})
-    @phrase = phrase.to_s
-    @target = target.to_s
+    @phrase = sanitize(phrase.to_s)
+    @target = sanitize(target.to_s)
 
     @default_coeff = options[:default_coeff] || DEFAULT_COEFF
     @distance_spec = options[:distance_spec] || DISTANCE_SPEC
@@ -113,10 +121,14 @@ class PerseusMatch
   # 1 >= similarity >= 0
   def similarity(coeff = nil)
     coeff ||= default_coeff  # passed arg may be nil
-    @similarity[coeff] ||= 1 / Math.exp(distance / (coeff * total_weight))
+    @similarity[coeff] ||= normalize_distance(coeff)
   end
 
   private
+
+  def sanitize(str)
+    str.gsub(/\s*\(.*?\)|\s*\[.*?\]/, '').sub(/\s*[\/:].*/, '')
+  end
 
   def calculate_distance
     return Infinity if phrase_tokens.disjoint?(target_tokens)
@@ -153,16 +165,25 @@ class PerseusMatch
     distance
   end
 
+  def normalize_distance(coeff)
+    length = phrase_tokens.size + target_tokens.size
+    return 0 if length == 0
+
+    norm = Math.log(length ** Math.sqrt(2)) * coeff * total_weight * Math::E
+
+    1 / Math.exp(distance / norm)
+  end
+
   def total_weight
     @total_weight ||= distance_spec.inject(0.0) { |total, (_, weight)| total + weight }
   end
 
   class CheckFailedError < StandardError
 
-    attr_reader :value, :threshold, :operator
+    attr_reader :pm, :value, :threshold, :operator
 
-    def initialize(value, threshold, operator)
-      @value, @threshold, @operator = value, threshold, operator
+    def initialize(pm, value, threshold, operator)
+      @pm, @value, @threshold, @operator = pm, value, threshold, operator
     end
 
     def to_s

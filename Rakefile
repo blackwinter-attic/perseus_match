@@ -14,7 +14,7 @@ begin
       :summary      => %q{Fuzzy string matching based on linguistic analysis},
       :files        => FileList['lib/**/*.rb', 'bin/*'].to_a,
       :extra_files  => FileList['[A-Z]*', 'spec/**/*.rb', 'sample/**/*'].to_a - %w[LINGO_BASE],
-      :dependencies => ['ruby-backports', ['ruby-nuggets', '>= 0.4.0']]
+      :dependencies => ['ruby-backports', ['ruby-nuggets', '>= 0.4.0'], ['unicode', '>= 0.1.1']]
     }
   }}
 rescue LoadError
