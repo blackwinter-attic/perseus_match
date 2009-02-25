@@ -8,6 +8,7 @@ require 'set'
 require 'rubygems'
 require 'nuggets/enumerable/minmax'
 require 'nuggets/numeric/duration'
+require 'nuggets/object/silence'
 require 'nuggets/string/evaluate'
 
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
@@ -158,7 +159,7 @@ action = if options[:check]
 
   if CSV.const_defined?(:Reader)
     require 'fastercsv'
-    CSV = FasterCSV
+    silence { CSV = FasterCSV }
   end
 
   format = if options[:align]
