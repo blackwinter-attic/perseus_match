@@ -36,6 +36,7 @@ require 'rubygems'
 require 'backports/tempfile'
 require 'nuggets/tempfile/open'
 require 'nuggets/util/i18n'
+require 'nuggets/util/ruby'
 
 begin
   require 'text/soundex'
@@ -111,12 +112,7 @@ class PerseusMatch
             YAML.dump(LINGO_CONFIG, t)
           }
 
-          file = file?(form) || begin
-            temp = Tempfile.open('perseus_match_temp') { |t| t.puts form }
-            temp.path
-          end
-
-          ruby = Config::CONFIG.values_at('RUBY_INSTALL_NAME', 'EXEEXT').join
+          file = file?(form)
 
           if keep = ENV['PM_KEEP_TOKENS']
             keep = File.expand_path(keep =~ /\A(?:1|y(?:es)?|true)\z/i ? tokens_file : keep)
@@ -124,16 +120,21 @@ class PerseusMatch
 
           begin
             Dir.chdir(LINGO_BASE) {
-              tokens = %x{#{ruby} lingo.rb -c "#{cfg.path}" < "#{file}"}
-              File.open(keep, 'w') { |f| f.puts tokens } if keep
-              parse(tokens, unknowns, @_tokens)
+              Process.ruby(*%W[lingo.rb -c #{cfg.path}]) { |_, i, o, _|
+                file ? File.foreach(file) { |line| i.puts line } : i.puts(form)
+
+                i.close_write
+                tokens = o.read
+
+                File.open(keep, 'w') { |f| f.puts tokens } if keep
+                parse(tokens, unknowns, @_tokens)
+              }
             }
           ensure
             cfg.unlink
-            temp.unlink if temp
           end
 
-          if temp
+          unless file
             tokens, @tokens = @tokens[form], nil
             tokens
           end
