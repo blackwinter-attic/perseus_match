@@ -1,6 +1,8 @@
 doc
+doc.local
 pkg
 coverage
+.gh-pages
 profile
 lingo.cfg
 LINGO_BASE
