@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>class PerseusMatch::TokenSet - perseus_match Application documentation (v0.0.8)</title>
+
+<link type="text/css" media="screen" href="../rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="../js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="../index.html">Home</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>lib/perseus_match/token_set.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link">Array
+  
+</nav>
+
+    
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li ><a href="#method-c-file-3F">::file?</a>
+    
+    <li class="calls-super" ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-c-parse">::parse</a>
+    
+    <li ><a href="#method-c-tokenize">::tokenize</a>
+    
+    <li ><a href="#method-i-3D-3D">#==</a>
+    
+    <li ><a href="#method-i-disjoint-3F">#disjoint?</a>
+    
+    <li ><a href="#method-i-distance">#distance</a>
+    
+    <li ><a href="#method-i-ensure_soundex-21">#ensure_soundex!</a>
+    
+    <li ><a href="#method-i-eql-3F">#eql?</a>
+    
+    <li ><a href="#method-i-excl">#excl</a>
+    
+    <li ><a href="#method-i-forms">#forms</a>
+    
+    <li ><a href="#method-i-incl">#incl</a>
+    
+    <li ><a href="#method-i-inclexcl">#inclexcl</a>
+    
+    <li ><a href="#method-i-inspect">#inspect</a>
+    
+    <li ><a href="#method-i-soundex">#soundex</a>
+    
+    <li ><a href="#method-i-to_s">#to_s</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="../COPYING.html">COPYING</a>
+  
+    <li class="file"><a href="../ChangeLog.html">ChangeLog</a>
+  
+    <li class="file"><a href="../README.html">README</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="../Object.html">Object</a>
+  
+    <li><a href="../PerseusMatch.html">PerseusMatch</a>
+  
+    <li><a href="../PerseusMatch/CheckFailedError.html">PerseusMatch::CheckFailedError</a>
+  
+    <li><a href="../PerseusMatch/Cluster.html">PerseusMatch::Cluster</a>
+  
+    <li><a href="../PerseusMatch/List.html">PerseusMatch::List</a>
+  
+    <li><a href="../PerseusMatch/PhraseTokenSet.html">PerseusMatch::PhraseTokenSet</a>
+  
+    <li><a href="../PerseusMatch/Token.html">PerseusMatch::Token</a>
+  
+    <li><a href="../PerseusMatch/TokenSet.html">PerseusMatch::TokenSet</a>
+  
+    <li><a href="../PerseusMatch/Version.html">PerseusMatch::Version</a>
+  
+    <li><a href="../String.html">String</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class PerseusMatch::TokenSet</h1>
+
+  <div id="description" class="description">
+    
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <!-- Attributes -->
+    <section id="attribute-method-details" class="method-section section">
+      <h3 class="section-header">Attributes</h3>
+
+      
+      <div id="attribute-i-form" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">form</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-tokens" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">tokens</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section><!-- attribute-method-details -->
+    
+
+    <!-- Methods -->
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Class Methods</h3>
+
+    
+      <div id="method-c-file-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">file?</span><span
+            class="method-args">(form)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="file-3F-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 146</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">file?</span>(<span class="ruby-identifier">form</span>)
+  <span class="ruby-identifier">file</span> = <span class="ruby-constant">Pathname</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">form</span>).<span class="ruby-identifier">absolute?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">form</span> <span class="ruby-operator">:</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">expand_path</span>(<span class="ruby-identifier">form</span>)
+  <span class="ruby-identifier">file</span> <span class="ruby-keyword">if</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">file?</span>(<span class="ruby-identifier">file</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">readable?</span>(<span class="ruby-identifier">file</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- file-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- file-3F-method -->
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(form, tokens = nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              
+            </div>
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 191</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">form</span>, <span class="ruby-identifier">tokens</span> = <span class="ruby-keyword">nil</span>)
+  <span class="ruby-keyword">super</span>(<span class="ruby-identifier">tokens</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">tokenize</span>(<span class="ruby-identifier">form</span>))
+
+  <span class="ruby-ivar">@form</span>   = <span class="ruby-identifier">form</span>
+  <span class="ruby-ivar">@tokens</span> = <span class="ruby-identifier">to_a</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- new-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- new-method -->
+
+    
+      <div id="method-c-tokenize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tokenize</span><span
+            class="method-args">(form, unknowns = false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tokenize-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tokenize</span>(<span class="ruby-identifier">form</span>, <span class="ruby-identifier">unknowns</span> = <span class="ruby-keyword">false</span>)
+  <span class="ruby-identifier">form</span>.<span class="ruby-identifier">downcase!</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-ivar">@tokens</span>[<span class="ruby-identifier">form</span>] <span class="ruby-keyword">if</span> <span class="ruby-ivar">@tokens</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>
+
+  <span class="ruby-ivar">@_tokens</span> = <span class="ruby-constant">Hash</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-ivar">@tokens</span>  = <span class="ruby-constant">Hash</span>.<span class="ruby-identifier">new</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">h</span>, <span class="ruby-identifier">k</span><span class="ruby-operator">|</span> <span class="ruby-identifier">h</span>[<span class="ruby-identifier">k</span>] = <span class="ruby-identifier">new</span>(<span class="ruby-identifier">k</span>, <span class="ruby-ivar">@_tokens</span>[<span class="ruby-identifier">k</span>] <span class="ruby-operator">||</span> []) }
+
+  <span class="ruby-identifier">tokens_file</span> = <span class="ruby-constant">ENV</span>[<span class="ruby-string">&#39;PM_TOKENS_FILE&#39;</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;perseus.tokens&#39;</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">readable?</span>(<span class="ruby-identifier">tokens_file</span>)
+    <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-identifier">tokens_file</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span> <span class="ruby-identifier">parse</span>(<span class="ruby-identifier">f</span>, <span class="ruby-identifier">unknowns</span>, <span class="ruby-ivar">@_tokens</span>) }
+    <span class="ruby-ivar">@tokens</span>[<span class="ruby-identifier">form</span>]
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-node">&quot;Lingo installation not found at #{LINGO_BASE}&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-constant">LINGO_FOUND</span>
+
+    <span class="ruby-identifier">cfg</span> = <span class="ruby-constant">Tempfile</span>.<span class="ruby-identifier">open</span>([<span class="ruby-string">&#39;perseus_match_lingo&#39;</span>, <span class="ruby-string">&#39;.cfg&#39;</span>]) { <span class="ruby-operator">|</span><span class="ruby-identifier">t</span><span class="ruby-operator">|</span>
+      <span class="ruby-constant">YAML</span>.<span class="ruby-identifier">dump</span>(<span class="ruby-constant">LINGO_CONFIG</span>, <span class="ruby-identifier">t</span>)
+    }
+
+    <span class="ruby-identifier">file</span> = <span class="ruby-identifier">file?</span>(<span class="ruby-identifier">form</span>)
+
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">keep</span> = <span class="ruby-constant">ENV</span>[<span class="ruby-string">&#39;PM_KEEP_TOKENS&#39;</span>]
+      <span class="ruby-identifier">keep</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">expand_path</span>(<span class="ruby-identifier">keep</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/\A(?:1|y(?:es)?|true)\z/</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">tokens_file</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">keep</span>)
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-keyword">begin</span>
+      <span class="ruby-constant">Dir</span>.<span class="ruby-identifier">chdir</span>(<span class="ruby-constant">LINGO_BASE</span>) {
+        <span class="ruby-constant">Process</span>.<span class="ruby-identifier">ruby</span>(<span class="ruby-operator">*</span><span class="ruby-node">%W[lingo.rb -c #{cfg.path}]</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">_</span>, <span class="ruby-identifier">i</span>, <span class="ruby-identifier">o</span>, <span class="ruby-identifier">_</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">file</span> <span class="ruby-operator">?</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">foreach</span>(<span class="ruby-identifier">file</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">line</span><span class="ruby-operator">|</span> <span class="ruby-identifier">i</span>.<span class="ruby-identifier">puts</span> <span class="ruby-identifier">line</span> } <span class="ruby-operator">:</span> <span class="ruby-identifier">i</span>.<span class="ruby-identifier">puts</span>(<span class="ruby-identifier">form</span>)
+
+          <span class="ruby-identifier">i</span>.<span class="ruby-identifier">close_write</span>
+          <span class="ruby-identifier">tokens</span> = <span class="ruby-identifier">o</span>.<span class="ruby-identifier">read</span>
+
+          <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-identifier">keep</span>, <span class="ruby-string">&#39;w&#39;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span> <span class="ruby-identifier">f</span>.<span class="ruby-identifier">puts</span> <span class="ruby-identifier">tokens</span> } <span class="ruby-keyword">if</span> <span class="ruby-identifier">keep</span>
+          <span class="ruby-identifier">parse</span>(<span class="ruby-identifier">tokens</span>, <span class="ruby-identifier">unknowns</span>, <span class="ruby-ivar">@_tokens</span>)
+        }
+      }
+    <span class="ruby-keyword">ensure</span>
+      <span class="ruby-identifier">cfg</span>.<span class="ruby-identifier">unlink</span>
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-keyword">unless</span> <span class="ruby-identifier">file</span>
+      <span class="ruby-identifier">tokens</span>, <span class="ruby-ivar">@tokens</span> = <span class="ruby-ivar">@tokens</span>[<span class="ruby-identifier">form</span>], <span class="ruby-keyword">nil</span>
+      <span class="ruby-identifier">tokens</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- tokenize-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- tokenize-method -->
+
+    
+    </section><!-- public-class-method-details -->
+  
+     <section id="private-class-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Private Class Methods</h3>
+
+    
+      <div id="method-c-parse" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">parse</span><span
+            class="method-args">(output, unknowns = false, tokens = {})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="parse-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 153</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">parse</span>(<span class="ruby-identifier">output</span>, <span class="ruby-identifier">unknowns</span> = <span class="ruby-keyword">false</span>, <span class="ruby-identifier">tokens</span> = {})
+  <span class="ruby-identifier">sanitize</span> = <span class="ruby-identifier">lambda</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">a</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">a</span>.<span class="ruby-identifier">sub!</span>(<span class="ruby-constant">Token</span><span class="ruby-operator">::</span><span class="ruby-constant">WC_RE</span>, <span class="ruby-string">&#39;&#39;</span>)
+    <span class="ruby-identifier">a</span>.<span class="ruby-identifier">downcase!</span>
+  }
+
+  <span class="ruby-identifier">output</span>.<span class="ruby-identifier">each_line</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">res</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">res</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-regexp">/&lt;(.*?)\s=\s\[(.*)\]&gt;/</span>
+        <span class="ruby-identifier">a</span>, <span class="ruby-identifier">b</span> = <span class="ruby-node">$1</span>, <span class="ruby-node">$2</span>
+        <span class="ruby-identifier">sanitize</span>[<span class="ruby-identifier">a</span>]
+
+        <span class="ruby-identifier">tokens</span>[<span class="ruby-identifier">a</span>] <span class="ruby-operator">||=</span> <span class="ruby-identifier">b</span>.<span class="ruby-identifier">scan</span>(<span class="ruby-regexp">/\((.*?)\+?\)/</span>).<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">t</span><span class="ruby-operator">|</span> <span class="ruby-constant">Token</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">t</span>) }
+      <span class="ruby-keyword">when</span> <span class="ruby-regexp">/&lt;(.*)&gt;/</span>, <span class="ruby-regexp">/:(.*):/</span>
+        <span class="ruby-identifier">a</span>, <span class="ruby-identifier">b</span> = <span class="ruby-node">$1</span>, <span class="ruby-constant">Token</span>.<span class="ruby-identifier">new</span>(<span class="ruby-node">$1</span>.<span class="ruby-identifier">downcase</span>)
+        <span class="ruby-identifier">sanitize</span>[<span class="ruby-identifier">a</span>]
+
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">unknowns</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">b</span>.<span class="ruby-identifier">unk?</span>
+          <span class="ruby-keyword">if</span> <span class="ruby-identifier">unknowns</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:&lt;&lt;</span>)
+            <span class="ruby-identifier">unknowns</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">a</span>
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-identifier">warn</span> <span class="ruby-node">&quot;UNK: #{a} [#{res.strip}]&quot;</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+
+        <span class="ruby-identifier">tokens</span>[<span class="ruby-identifier">a</span>] <span class="ruby-operator">||=</span> [<span class="ruby-identifier">b</span>]
+    <span class="ruby-keyword">end</span>
+  }
+
+  <span class="ruby-identifier">tokens</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- parse-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- parse-method -->
+
+    
+    </section><!-- private-class-method-details -->
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-3D-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">==</span><span
+            class="method-args">(other)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="3D-3D-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 231</span>
+<span class="ruby-keyword">def</span> <span class="ruby-operator">==</span>(<span class="ruby-identifier">other</span>)
+  <span class="ruby-identifier">tokens</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">tokens</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- 3D-3D-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- 3D-3D-method -->
+
+    
+      <div id="method-i-disjoint-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">disjoint?</span><span
+            class="method-args">(other)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="disjoint-3F-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 206</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">disjoint?</span>(<span class="ruby-identifier">other</span>)
+  (<span class="ruby-identifier">forms</span>.<span class="ruby-identifier">flatten</span> <span class="ruby-operator">&amp;</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">forms</span>.<span class="ruby-identifier">flatten</span>).<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">empty?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- disjoint-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- disjoint-3F-method -->
+
+    
+      <div id="method-i-distance" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">distance</span><span
+            class="method-args">(other)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="distance-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 198</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">distance</span>(<span class="ruby-identifier">other</span>)
+  (<span class="ruby-identifier">forms</span> <span class="ruby-operator">|</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">forms</span>).<span class="ruby-identifier">size</span> <span class="ruby-operator">-</span> (<span class="ruby-identifier">forms</span> <span class="ruby-operator">&amp;</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">forms</span>).<span class="ruby-identifier">size</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- distance-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- distance-method -->
+
+    
+      <div id="method-i-eql-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">eql?</span><span
+            class="method-args">(other)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="eql-3F-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 235</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">eql?</span>(<span class="ruby-identifier">other</span>)
+  <span class="ruby-keyword">self</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">form</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">form</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- eql-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- eql-3F-method -->
+
+    
+      <div id="method-i-excl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">excl</span><span
+            class="method-args">(wcs)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="excl-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 218</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">excl</span>(<span class="ruby-identifier">wcs</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">form</span>, <span class="ruby-identifier">reject</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">token</span><span class="ruby-operator">|</span> <span class="ruby-identifier">token</span>.<span class="ruby-identifier">match?</span>(<span class="ruby-identifier">wcs</span>) })
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- excl-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- excl-method -->
+
+    
+      <div id="method-i-forms" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">forms</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="forms-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 202</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">forms</span>
+  <span class="ruby-ivar">@forms</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">token</span><span class="ruby-operator">|</span> <span class="ruby-identifier">token</span>.<span class="ruby-identifier">form</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- forms-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- forms-method -->
+
+    
+      <div id="method-i-incl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">incl</span><span
+            class="method-args">(wcs)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="incl-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 214</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">incl</span>(<span class="ruby-identifier">wcs</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">form</span>, <span class="ruby-identifier">select</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">token</span><span class="ruby-operator">|</span> <span class="ruby-identifier">token</span>.<span class="ruby-identifier">match?</span>(<span class="ruby-identifier">wcs</span>) })
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- incl-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- incl-method -->
+
+    
+      <div id="method-i-inclexcl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">inclexcl</span><span
+            class="method-args">(inclexcl = {})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="inclexcl-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 210</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">inclexcl</span>(<span class="ruby-identifier">inclexcl</span> = {})
+  <span class="ruby-identifier">incl</span>(<span class="ruby-identifier">inclexcl</span>[<span class="ruby-value">:incl</span>] <span class="ruby-operator">||</span> <span class="ruby-constant">Token</span><span class="ruby-operator">::</span><span class="ruby-constant">ANY_WC</span>).<span class="ruby-identifier">excl</span>(<span class="ruby-identifier">inclexcl</span>[<span class="ruby-value">:excl</span>])
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- inclexcl-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- inclexcl-method -->
+
+    
+      <div id="method-i-inspect" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">inspect</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="inspect-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 239</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">inspect</span>
+  <span class="ruby-node">&quot;#{super}&lt;#{form}&gt;&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- inspect-source -->
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="TokenSet.html#method-i-to_s">to_s</a>
+        </div>
+        
+
+        
+      </div><!-- inspect-method -->
+
+    
+      <div id="method-i-soundex" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">soundex</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="soundex-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 222</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">soundex</span>
+  <span class="ruby-identifier">ensure_soundex!</span>
+
+  <span class="ruby-ivar">@soundex</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">form</span>, <span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">token</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">form</span> = <span class="ruby-identifier">token</span>.<span class="ruby-identifier">form</span>.<span class="ruby-identifier">replace_diacritics</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\W+/</span>, <span class="ruby-string">&#39;&#39;</span>)
+    <span class="ruby-constant">Token</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">Text</span><span class="ruby-operator">::</span><span class="ruby-constant">Soundex</span>.<span class="ruby-identifier">soundex</span>(<span class="ruby-identifier">form</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">token</span>.<span class="ruby-identifier">wc</span>)
+  })
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- soundex-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- soundex-method -->
+
+    
+      <div id="method-i-to_s" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">to_s</span><span
+            class="method-args">()</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="TokenSet.html#method-i-inspect">inspect</a>
+        </div>
+        
+      </div><!-- to_s-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+     <section id="private-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Private Instance Methods</h3>
+
+    
+      <div id="method-i-ensure_soundex-21" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">ensure_soundex!</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="ensure_soundex-21-source">
+            <pre><span class="ruby-comment"># File lib/perseus_match/token_set.rb, line 247</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ensure_soundex!</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-keyword">defined?</span>(<span class="ruby-constant">Text</span><span class="ruby-operator">::</span><span class="ruby-constant">Soundex</span>)
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">RuntimeError</span>, <span class="ruby-string">&quot;Soundex functionality not available&quot;</span>, <span class="ruby-identifier">caller</span>(<span class="ruby-value">1</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- ensure_soundex-21-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- ensure_soundex-21-method -->
+
+    
+    </section><!-- private-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 4.0.1.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+
