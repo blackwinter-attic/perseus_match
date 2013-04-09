@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors = ["Jens Wille"]
   s.date = %q{2011-04-29}
   s.description = %q{Fuzzy string matching based on linguistic analysis}
-  s.email = %q{jens.wille@uni-koeln.de}
+  s.email = %q{jens.wille@gmail.com}
   s.executables = ["perseus_match"]
   s.extra_rdoc_files = ["README", "COPYING", "ChangeLog"]
   s.files = ["lib/perseus_match/token.rb", "lib/perseus_match/token_set.rb", "lib/perseus_match/cluster.rb", "lib/perseus_match/version.rb", "lib/perseus_match/core_ext.rb", "lib/perseus_match/list.rb", "lib/perseus_match.rb", "bin/perseus_match", "README", "ChangeLog", "Rakefile", "COPYING", "example/lingo.cfg", "example/phrases.txt", "example/check.csv", "example/config.yaml", "spec/perseus_match/cluster_spec.rb", "spec/perseus_match/list_spec.rb", "spec/perseus_match/token_spec.rb", "spec/perseus_match/token_set_spec.rb", "spec/perseus_match_spec.rb", "spec/spec.opts", "spec/spec_helper.rb"]

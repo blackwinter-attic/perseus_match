@@ -3,12 +3,14 @@
 #                                                                             #
 # perseus_match -- Fuzzy string matching based on linguistic analysis         #
 #                                                                             #
-# Copyright (C) 2008-2011 Cologne University of Applied Sciences              #
+# Copyright (C) 2008-2012 Cologne University of Applied Sciences              #
 #                         Claudiusstr. 1                                      #
 #                         50678 Cologne, Germany                              #
 #                                                                             #
+# Copyright (C) 2013 Jens Wille                                               #
+#                                                                             #
 # Authors:                                                                    #
-#     Jens Wille <jens.wille@uni-koeln.de>                                    #
+#     Jens Wille <jens.wille@gmail.com>                                       #
 #                                                                             #
 # perseus_match is free software: you can redistribute it and/or modify it    #
 # under the terms of the GNU Affero General Public License as published by    #
