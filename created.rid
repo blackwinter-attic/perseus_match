@@ -1,7 +1,7 @@
-Tue, 09 Apr 2013 12:21:33 +0200
+Tue, 16 Apr 2013 12:31:32 +0200
 README	Tue, 09 Apr 2013 12:19:07 +0200
 COPYING	Tue, 09 Apr 2013 11:32:49 +0200
-ChangeLog	Tue, 09 Apr 2013 11:32:49 +0200
+ChangeLog	Tue, 16 Apr 2013 12:19:20 +0200
 lib/perseus_match.rb	Tue, 09 Apr 2013 12:19:51 +0200
 lib/perseus_match/list.rb	Tue, 09 Apr 2013 12:20:11 +0200
 lib/perseus_match/token.rb	Tue, 09 Apr 2013 11:32:49 +0200
