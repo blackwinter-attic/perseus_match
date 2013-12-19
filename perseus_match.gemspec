@@ -1,22 +1,23 @@
 # -*- encoding: utf-8 -*-
+# stub: perseus_match 0.0.9 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "perseus_match"
-  s.version = "0.0.8"
+  s.version = "0.0.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jens Wille"]
-  s.date = "2013-07-15"
+  s.date = "2013-12-19"
   s.description = "Fuzzy string matching based on linguistic analysis"
   s.email = "jens.wille@gmail.com"
   s.executables = ["perseus_match"]
   s.extra_rdoc_files = ["README", "COPYING", "ChangeLog"]
   s.files = ["lib/perseus_match.rb", "lib/perseus_match/cluster.rb", "lib/perseus_match/core_ext.rb", "lib/perseus_match/list.rb", "lib/perseus_match/token.rb", "lib/perseus_match/token_set.rb", "lib/perseus_match/version.rb", "bin/perseus_match", "COPYING", "ChangeLog", "README", "Rakefile", "example/check.csv", "example/config.yaml", "example/lingo.cfg", "example/phrases.txt", "spec/perseus_match/cluster_spec.rb", "spec/perseus_match/list_spec.rb", "spec/perseus_match/token_set_spec.rb", "spec/perseus_match/token_spec.rb", "spec/perseus_match_spec.rb", "spec/spec.opts", "spec/spec_helper.rb"]
   s.homepage = "http://github.com/blackwinter/perseus_match"
-  s.licenses = ["AGPL"]
-  s.rdoc_options = ["--charset", "UTF-8", "--line-numbers", "--all", "--title", "perseus_match Application documentation (v0.0.8)", "--main", "README"]
+  s.licenses = ["AGPL-3.0"]
+  s.rdoc_options = ["--title", "perseus_match Application documentation (v0.0.9)", "--charset", "UTF-8", "--line-numbers", "--all", "--main", "README"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "2.0.5"
+  s.rubygems_version = "2.1.11"
   s.summary = "Fuzzy string matching based on linguistic analysis"
 
   if s.respond_to? :specification_version then
