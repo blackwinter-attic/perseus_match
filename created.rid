@@ -1,11 +1,11 @@
-Tue, 16 Apr 2013 12:31:32 +0200
-README	Tue, 09 Apr 2013 12:19:07 +0200
+Thu, 19 Dec 2013 13:20:57 +0100
+README	Thu, 19 Dec 2013 13:20:21 +0100
 COPYING	Tue, 09 Apr 2013 11:32:49 +0200
 ChangeLog	Tue, 16 Apr 2013 12:19:20 +0200
 lib/perseus_match.rb	Tue, 09 Apr 2013 12:19:51 +0200
 lib/perseus_match/list.rb	Tue, 09 Apr 2013 12:20:11 +0200
 lib/perseus_match/token.rb	Tue, 09 Apr 2013 11:32:49 +0200
 lib/perseus_match/cluster.rb	Tue, 09 Apr 2013 12:20:06 +0200
-lib/perseus_match/version.rb	Tue, 09 Apr 2013 11:32:49 +0200
+lib/perseus_match/version.rb	Thu, 19 Dec 2013 13:20:28 +0100
 lib/perseus_match/core_ext.rb	Tue, 09 Apr 2013 11:32:49 +0200
 lib/perseus_match/token_set.rb	Tue, 09 Apr 2013 12:20:20 +0200
