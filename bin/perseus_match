@@ -149,7 +149,7 @@ File.open(file) { |f|
 }
 
 pm_options = options[:config] ? YAML.load_file(options[:config]) : {}
-pm_options[:verbose] = options[:verbose] if options.has_key?(:verbose)
+pm_options[:verbose] = options[:verbose] if options.key?(:verbose)
 list_options = { :minimal => options[:minimal] }
 
 threshold, count, count_all = options[:threshold], 0, 0

@@ -68,7 +68,7 @@ PRINTABLE_CHAR_RE = %r{(?:#{PRINTABLE_CHAR})+}
 lingo_config = if File.readable?(file = ENV['PM_LINGO_CONFIG'] || 'lingo.cfg')
   YAML.load_file(file)
 else
-  warn "Lingo config not found at #{ENV['PM_LINGO_CONFIG']} -- using default" if ENV.has_key?('PM_LINGO_CONFIG')
+  warn "Lingo config not found at #{ENV['PM_LINGO_CONFIG']} -- using default" if ENV.key?('PM_LINGO_CONFIG')
 
   {
     'meeting' => {
