@@ -12,10 +12,9 @@ Fuzzy string matching based on linguistic analysis.
 
 == LINKS
 
-<b></b>
-Documentation:: http://blackwinter.github.com/perseus_match
-Source code::   http://github.com/blackwinter/perseus_match
-RubyGem::       http://rubygems.org/gems/perseus_match
+Documentation:: https://blackwinter.github.io/perseus_match/
+Source code::   https://github.com/blackwinter/perseus_match
+RubyGem::       https://rubygems.org/gems/perseus_match
 
 
 == AUTHORS
